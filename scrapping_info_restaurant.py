@@ -4,16 +4,18 @@ from urllib.parse import urljoin
 from urllib.parse import urlparse
 import time
 import random
+import re
+import pandas as pd
 
-def liste_avis(url : str, max_pages : int = None) -> list[str]:
+def infos_avis(url : str, max_pages : int = None) -> pd.DataFrame :
     '''
-    Scrape les avis sur plusieurs pages à partir d'une URL de base.
+    Scrape les informations des avis sur plusieurs pages à partir d'une URL de base.
     Arguments : 
         - url : une URL de la page web contenant les avis.
         - max_pages : Nombre maximum de pages à scraper.
     
     Retourne : 
-        - Une liste contenant les textes des avis 
+        - Un data frame pandas contenant la date, la note et le commentaire de chaque avis 
     '''
 
     #Ajouter un en-tête User-Agent pour simuler un navigateur
@@ -36,6 +38,8 @@ def liste_avis(url : str, max_pages : int = None) -> list[str]:
     base_url = parsed_url.scheme + "://" + parsed_url.netloc
 
     clean_texte = []
+    clean_dates = []
+    clean_notes = []
     url_next_page = url
     page_count = 0
 
@@ -53,14 +57,40 @@ def liste_avis(url : str, max_pages : int = None) -> list[str]:
         fullcorpus = response.text
         soup = BeautifulSoup(fullcorpus, "html.parser")
 
+
+        ##### DATE COMMENTAIRES #####
+
+        # Trouver les balises title avec la classe "aVuQn"
+        date_avis = soup.find_all('div', {'class' : 'aVuQn'})
+
+        #Extraire uniquement la date 
+        for date in date_avis:
+            clean_dates.append((date.text).split(' • ')[0]) #Pour ne garder que la date
+
+
+        ##### NOTES CLIENT #####
+
+        # Trouver les balises title avec la classe "UctUV d H0"
+        note_avis = soup.find_all('svg', {'class' : "UctUV d H0"})
+
+        #Extraire uniquement la note
+        if note_avis:
+            match = re.search(r"(\d+,\d+)", note_avis[0].text)
+            note = match.group(1) if match else None
+
+
+        ##### CONTENU COMMENTAIRES ET AJOUT NOTES ######
+
         #Trouver toutes les balises span avec la classe 'JguWG'
         texte_avis = soup.find_all('span', class_='JguWG')
 
         #Extraire uniquement le texte de l'avis client 
         for texte in texte_avis:
-            if texte.find_parent(class_="csNQI PJ"):  # Exclut les réponses du propriétaire
+            if texte.find_parent(class_="csNQI PJ"):  #Exclut les réponses du propriétaire
                 continue  # Ignore ce texte
             clean_texte.append(texte.text)
+            clean_notes.append(note) #Ajoute la note que si il y a un commentaire
+
 
         #Trouver le lien vers la page suivante 
         next_page = soup.find('a', {'aria-label':'Page suivante'})
@@ -76,4 +106,13 @@ def liste_avis(url : str, max_pages : int = None) -> list[str]:
         #Pause de 1 à 2 secondes entre les pages pour éviter de se faire bloquer
         time.sleep(1 + (4 * random.random()))  #Pause aléatoire entre 1 et 5 secondes
     
-    return clean_texte
+    #Stocker tout les résultats dans un dataframe 
+    results = {
+        "Date" : clean_dates,
+        "Notes" : clean_notes,
+        "Commentaires" : clean_texte
+    }
+
+    df_results = pd.DataFrame(results)
+    
+    return df_results
