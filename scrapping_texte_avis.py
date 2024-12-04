@@ -56,8 +56,10 @@ def liste_avis(url : str, max_pages : int = None) -> list[str]:
         #Trouver toutes les balises span avec la classe 'JguWG'
         texte_avis = soup.find_all('span', class_='JguWG')
 
-        #Extraire uniquement le texte 
+        #Extraire uniquement le texte de l'avis client 
         for texte in texte_avis:
+            if texte.find_parent(class_="csNQI PJ"):  # Exclut les réponses du propriétaire
+                continue  # Ignore ce texte
             clean_texte.append(texte.text)
 
         #Trouver le lien vers la page suivante 
