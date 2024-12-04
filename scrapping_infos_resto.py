@@ -1,6 +1,12 @@
 '''
 IMPORTANT : CE QUI EST EN COMMENTAIRE NE FONCTIONNE PAS
 '''
+import requests
+from bs4 import BeautifulSoup
+import time
+import random
+import re
+import pandas as pd
 
 
 def infos_resto(url : str) -> pd.DataFrame : 
