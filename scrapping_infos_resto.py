@@ -1,14 +1,3 @@
-'''
-IMPORTANT : CE QUI EST EN COMMENTAIRE NE FONCTIONNE PAS
-'''
-import requests
-from bs4 import BeautifulSoup
-import time
-import random
-import re
-import pandas as pd
-
-
 def infos_resto(url : str) -> pd.DataFrame : 
     '''
     Scrape les informations d'un restaurant à partir d'une URL de base.
@@ -17,12 +6,11 @@ def infos_resto(url : str) -> pd.DataFrame :
     
     Retourne : 
         - Un data frame pandas contenant : 
-            - Le nom,
-            - Le type de cuisine 
-            - L'adresse 
+            - Nom
+            - Type de cuisine 
+            - Fourchette de prix
+            - Adresse 
             - Note moyenne
-            - Site web
-            - Infos pratiques 
     '''
 
     #Ajouter un en-tête User-Agent pour simuler un navigateur
@@ -45,7 +33,7 @@ def infos_resto(url : str) -> pd.DataFrame :
     type_c = []
     adresse_resto = []
     note_resto = []
-    url_resto = []
+    fourchette_resto = []
 
     #Récupère le contenu HTML de la page concernée
     response = requests.get(url, headers = headers)
@@ -63,9 +51,18 @@ def infos_resto(url : str) -> pd.DataFrame :
     
 
     ###### TYPE DE CUISINE ######
-    # borne_tc = soup.find_all('a', {'class' : ''})
-    # for tc in borne_tc : 
-    #     type_c.append(tc.text)
+    borne_tc = soup.find_all('div', {'class' : 'biGQs _P pZUbB alXOW oCpZu GzNcM nvOhm UTQMg ZTpaU W hmDzD'})
+    for tc in borne_tc[1] : #Uniquement le deuxième élément qui contient le type de cuisine
+        type_c.append(tc.text)
+
+    
+    ##### FOURCHETTE DE PRIX #####
+    borne_four = soup.find('div', {'class' : 'biGQs _P pZUbB alXOW oCpZu GzNcM nvOhm UTQMg ZTpaU W hmDzD'})
+    for four in borne_four :
+        fourchette_resto.append(four.text)
+    
+    #Formatage
+    fourchette_resto = [four.replace('\xa0', '') for four in fourchette_resto]
 
 
     ##### ADRESSE #####
@@ -79,12 +76,16 @@ def infos_resto(url : str) -> pd.DataFrame :
     match = re.search(r"(\d+,\d)", borne_note[0].text)
     note_resto = match.group(1)
 
-    
-    ##### SITE WEB #####
-    # site_internet = soup.find_all('a', {'data-automation':'restaurantsWebsiteButton'})
-    # for site in site_internet:
-    #     href = site.get('href')  # Récupère la valeur de l'attribut href
-    #     if href:  # Vérifie que l'attribut href existe
-    #         url_resto.append(href)
 
-    return url_resto
+    #Stocke les résultats dans un dataframe
+    results = {
+        "Nom" : nom_resto,
+        "Type_Cuisine" : type_c,
+        "Fourchette_prix" : fourchette_resto,
+        "Adresse" : adresse_resto,
+        "Note_moyenne" : note_resto
+    }
+
+    df_results = pd.DataFrame(results)
+
+    return df_results
