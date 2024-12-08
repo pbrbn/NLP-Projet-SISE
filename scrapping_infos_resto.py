@@ -1,3 +1,7 @@
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+
 def infos_resto(url : str) -> pd.DataFrame : 
     '''
     Scrape les informations d'un restaurant à partir d'une URL de base.
