@@ -53,7 +53,7 @@ class WebScraper:
             soup = BeautifulSoup(html_content, "html.parser")
 
             # Trouver les blocs contenant les commentaires
-            commentaires_blocs = soup.find_all('div', {"class":'_c'})  # Remplacez par la classe appropriée
+            commentaires_blocs = soup.find_all('div', {"class":'_c'})
 
             for bloc in commentaires_blocs:
                 # Extraire la date
@@ -114,15 +114,15 @@ class WebScraper:
 
         # Type de cuisine
         borne_tc = soup.find_all('div', {'class': 'biGQs _P pZUbB alXOW oCpZu GzNcM nvOhm UTQMg ZTpaU W hmDzD'})
-        type_c = [tc.text for tc in borne_tc[1]] if len(borne_tc) > 1 else []
+        type_c = [tc.text for tc in borne_tc[1]] if len(borne_tc) > 1 else ["NA"]
 
         # Fourchette de prix
         borne_four = soup.find('div', {'class': 'biGQs _P pZUbB alXOW oCpZu GzNcM nvOhm UTQMg ZTpaU W hmDzD'})
-        fourchette_resto = [borne_four.text.replace('\xa0', '')] if borne_four else []
+        fourchette_resto = [borne_four.text.replace('\xa0', '')] if borne_four else ["NA"]
 
         # Adresse
         borne_adresse = soup.find_all('div', {'class': 'akmhy e j'})
-        adresse_resto = [adresse.text for adresse in borne_adresse[:1]]  # Premier élément uniquement
+        adresse_resto = [adresse.text for adresse in borne_adresse[:1]] if borne_adresse else ["NA"]  # Premier élément uniquement
 
         # Note moyenne
         borne_note = soup.find_all('div', {'class': 'sOyfn u f K'})
@@ -130,6 +130,8 @@ class WebScraper:
         if borne_note:
             match = re.search(r"(\d+,\d)", borne_note[0].text)
             note_resto = match.group(1) if match else None
+        else :
+            note_resto = "NA"
 
         # Créer un DataFrame des résultats
         results = {
