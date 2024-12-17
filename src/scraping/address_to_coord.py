@@ -1,4 +1,3 @@
-import folium
 from geopy.geocoders import Nominatim
 
 def find_coord(address:str) -> list :
