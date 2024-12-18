@@ -2,11 +2,13 @@ from textblob import TextBlob
 
 def sentiments_analyse(avis : list[str]) -> dict:
     '''
-    Cette fonction permet de faire uen analyse des sentiments du texte
-    Elle prend en entrée une liste d'avis 
-    Elle retourne en sortie un dictionnaire contenant : 
-        - La polarité de la totalité des avis 
-        - La subjectivité de la totalité des avis
+    Cette fonction permet de faire une analyse des sentiments du texte
+
+    Paramètres : 
+        - avis : Liste de chaines de caractères représentant les avis
+    
+    Retourne : 
+        - results : Dictionnaire contenant la polarité et la subjectivité du texte
     '''
 
     #Regroupement des avis dans un texte uniforme 
