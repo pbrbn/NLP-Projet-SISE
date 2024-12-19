@@ -50,7 +50,6 @@ def combine_and_aggregate(infos_avis, infos_resto):
     })
 
     # Renommer id_x pour plus de clarté
-    # Renommer id_x pour plus de clarté
     aggregated_df.rename(columns={'id_x': 'id_restaurant'}, inplace=True)
     return aggregated_df
 
@@ -60,25 +59,14 @@ def save_preprocessed_data(data, filename):
     df = pd.DataFrame(data, columns=['text'])
     df.to_csv(filename, index=False)
 
-# Création de matrice Documents-Termes
-def create_dtm(corpus, method='tfidf'):
-    """Crée une matrice documents-termes à partir d'un corpus."""
-    if method == 'tfidf':
-        vectorizer = TfidfVectorizer()
-    else:
-        vectorizer = CountVectorizer()
-    dtm = vectorizer.fit_transform(corpus)
-    return dtm, vectorizer
 
-# Génération de nuage de mots
-def generate_wordcloud(corpus):
-    """Génère et affiche un nuage de mots à partir d'un corpus."""
-    text = ' '.join(corpus)
-    wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
-    plt.figure(figsize=(10, 5))
-    plt.imshow(wordcloud, interpolation='bilinear')
-    plt.axis('off')
-    plt.show()
+# Sauvegarde dans une base SQLite
+def save_to_sqlite(df, db_name, table_name):
+    """Sauvegarde un DataFrame dans une base de données SQLite."""
+    engine = create_engine(f'sqlite:///{db_name}')
+    with engine.connect() as conn:
+        df.to_sql(table_name, conn, if_exists='replace', index=False)
+    print(f"Données sauvegardées dans la table '{table_name}' de la base '{db_name}'.")
 
 print("Processing module loaded successfully!")
 print("You can now use the functions preprocess_reviews, save_preprocessed_data, create_dtm and generate_wordcloud.")
