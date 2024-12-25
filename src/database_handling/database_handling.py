@@ -1,5 +1,7 @@
 import sqlite3
 import os
+from geopy.geocoders import Nominatim
+
 
 class DBHandling:
     """Class pour gérer les opérations à la base de données SQLite (Singleton)."""
@@ -139,7 +141,9 @@ class DBHandling:
                 type_cuisine TEXT,
                 fourchette_prix TEXT,
                 adresse TEXT,
-                note_moyenne REAL
+                note_moyenne REAL,
+                latitude REAL,
+                longitude REAL
             )
             """)
             self.execute_query("""
@@ -174,8 +178,20 @@ class DBHandling:
             db.insert_restaurant("Le Petit Paris", "Français", "€€", "1 rue de Paris, 75001 Paris", 4.5)
             db.close()
         """
+        # Get the lat and long from the address
+        # Enlever la virgule dans adresse car erreur d'argument
+        adresse = adresse.replace(",", "")
+        coords = self.find_coord(str(adresse)) # Use Nominatim to get the coordinates
+        if coords is None:
+            # Quelques fois geopy a du mal avec l'adresse mais peut fonctionner avec le resto + ville
+            print(nom)
+            coords = self.find_coord(str(nom + ", Lyon"))
+        if coords is None:
+            print(f"Impossible de trouver les coordonnées pour l'adresse : {adresse}")
+        
+        latitude, longitude = coords
         try:
-            self.execute_query("INSERT INTO restaurants (nom, type_cuisine, fourchette_prix, adresse, note_moyenne) VALUES (?, ?, ?, ?, ?)", (nom, type_cuisine, fourchette_prix, adresse, note_moyenne))
+            self.execute_query("INSERT INTO restaurants (nom, type_cuisine, fourchette_prix, adresse, note_moyenne, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?)", (nom, type_cuisine, fourchette_prix, adresse, note_moyenne, latitude, longitude))
             print("Insertion réussie.")
         except sqlite3.Error as e:
             print("Erreur lors de l'insertion.")
@@ -204,4 +220,26 @@ class DBHandling:
             print("Erreur lors de l'insertion.")
             print(f"An error occurred: {e}")
     
+
+
+    def find_coord(self, address: str) -> list:
+        """
+        Trouve les coordonnées (latitude, longitude) pour une adresse donnée.
+        
+        Args:
+            address (str): L'adresse pour laquelle trouver les coordonnées.
+        
+        Returns:
+            list: [latitude, longitude] ou None si l'adresse n'est pas trouvée.
+        """
+        geolocator = Nominatim(user_agent="geoapi")
+        location = None
+
+        location = geolocator.geocode(address)
+        print(location)
+        if location!=None:
+            latitude = location.latitude
+            longitude = location.longitude
+            return [latitude, longitude]
+        return None
     
