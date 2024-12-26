@@ -53,7 +53,7 @@ class WebScraper:
             soup = BeautifulSoup(html_content, "html.parser")
 
             # Trouver les blocs contenant les commentaires
-            commentaires_blocs = soup.find_all('div', {"class":'_c'})  # Remplacez par la classe appropriée
+            commentaires_blocs = soup.find_all('div', {"class":'_c'}) 
 
             for bloc in commentaires_blocs:
                 # Extraire la date
@@ -125,7 +125,7 @@ class WebScraper:
 
         #Initialisation
         fourchette_resto = []
-        
+
         #Nom du restaurant
         nom_resto = [nom.text for nom in soup.find_all('h1', {'class': 'biGQs _P egaXP rRtyp'})]
 
