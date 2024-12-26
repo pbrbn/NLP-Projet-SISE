@@ -123,6 +123,9 @@ class WebScraper:
         html_content = self._fetch_html(self.base_url)
         soup = BeautifulSoup(html_content, "html.parser")
 
+        #Initialisation
+        fourchette_resto = []
+        
         #Nom du restaurant
         nom_resto = [nom.text for nom in soup.find_all('h1', {'class': 'biGQs _P egaXP rRtyp'})]
 
@@ -132,7 +135,22 @@ class WebScraper:
 
         #Fourchette de prix
         borne_four = soup.find('div', {'class': 'biGQs _P pZUbB alXOW oCpZu GzNcM nvOhm UTQMg ZTpaU W hmDzD'})
-        fourchette_resto = [borne_four.text.replace('\xa0', '')] if borne_four else ["NA"]
+        if borne_four:
+            #Trouve la balise précédente
+            previous_div = borne_four.find_previous('div', {'class': 'biGQs _P ncFvv NaqPn'})
+
+            if previous_div:
+                #Vérifie le contenu de la balise précédente
+                if previous_div.text.strip() == "FOURCHETTE DE PRIX":  
+                    fourchette_resto.append(borne_four.text)
+                else:
+                    fourchette_resto.append("NA")
+            else:
+                #Si la balise précédente n'est pas trouvée, ajouter NA
+                fourchette_resto.append("NA")
+        else:
+            #Si la balise principale n'est pas trouvée, ajouter NA
+            fourchette_resto.append("NA")
 
         #Adresse
         borne_adresse = soup.find_all('div', {'class': 'akmhy e j'})
