@@ -142,6 +142,7 @@ class DBHandling:
                 fourchette_prix TEXT,
                 adresse TEXT,
                 note_moyenne REAL,
+                description TEXT,
                 latitude REAL,
                 longitude REAL
             )
@@ -161,7 +162,7 @@ class DBHandling:
             print("Erreur lors de la création des tables.")
             print(f"An error occurred: {e}")
     
-    def insert_restaurant(self, nom: str, type_cuisine: str, fourchette_prix: str, adresse: str, note_moyenne: float):
+    def insert_restaurant(self, nom: str, type_cuisine: str, fourchette_prix: str, adresse: str, note_moyenne: float, description: str = "Description non renseigner"):
         """
         Insère un restaurant dans la table 'restaurants'.
 
@@ -191,7 +192,8 @@ class DBHandling:
         
         latitude, longitude = coords
         try:
-            self.execute_query("INSERT INTO restaurants (nom, type_cuisine, fourchette_prix, adresse, note_moyenne, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?)", (nom, type_cuisine, fourchette_prix, adresse, note_moyenne, latitude, longitude))
+            self.execute_query("INSERT INTO restaurants (nom, type_cuisine, fourchette_prix, adresse, note_moyenne, description, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+                               , (nom, type_cuisine, fourchette_prix, adresse, note_moyenne, description, latitude, longitude))
             print("Insertion réussie.")
         except sqlite3.Error as e:
             print("Erreur lors de l'insertion.")
