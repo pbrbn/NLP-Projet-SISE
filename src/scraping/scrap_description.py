@@ -1,8 +1,10 @@
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
+import time
+import random
 
-def description_resto(url :str) : 
+def description_resto(url :str) -> pd.DataFrame : 
     '''
     Scrape la description d'un restaurant à partir d'une URL de base.
     Arguments : 
@@ -30,20 +32,27 @@ def description_resto(url :str) :
     #Initialisation 
     description = []
     nom_resto = []
+    borne_nom = None
 
-    #Récupère le contenu HTML de la page concernée
-    response = requests.get(url, headers = headers)
-    if response.status_code != 200:
-        raise Exception(f"Échec de la récupération du contenu, code de statut : {response.status_code}")
+    #Boucle pour refaire la requête si il ne trouve pas la balise
+    while borne_nom == None : 
+        #Pause en cas de requêtes multiples
+        time.sleep(1 + (2 * random.random()))
+        #Récupère le contenu HTML de la page concernée
+        response = requests.get(url, headers = headers)
+        if response.status_code != 200:
+            raise Exception(f"Échec de la récupération du contenu, code de statut : {response.status_code}")
 
-    #Parser avec BS4
-    html_content = response.text
-    soup = BeautifulSoup(html_content, "html.parser")
+        #Parser avec BS4
+        html_content = response.text
+        soup = BeautifulSoup(html_content, "html.parser")
 
-    ##### NOM RESTO #####
-    borne_nom = soup.find('h1', {'class' : 'biGQs _P hzzSG rRtyp'})
-    for nom in borne_nom :
-        nom_resto.append(nom.text)
+        ##### NOM RESTO #####
+        borne_nom = soup.find('h1', {'class' : 'biGQs _P hzzSG rRtyp'})
+        
+        #Récupère le nom du resto
+        for nom in borne_nom :
+            nom_resto.append(nom.text)
 
 
     ##### DESCRIPTION #####
