@@ -19,6 +19,8 @@ def preprocess_reviews(reviews):
     stop_words = set(stopwords.words('french'))
 
     for avis in reviews:  # reviews est une liste de chaînes de caractères
+        #Supprimer les mots de moins de 2 caractères 
+        avis = re.sub(r'\b\w{1,2}\b', '', avis).strip()
         # Supression des chiffres 
         chiffres = list("0123456789")
         avis = "".join([w for w in list(avis) if not w in chiffres])
