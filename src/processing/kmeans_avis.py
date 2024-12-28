@@ -13,7 +13,7 @@ def clustering_avis(avis : list[str], vector_size : int = 100, n_clusters : int 
 
     Arguments :
         - avis : Liste de str correspondant à la liste d'avis.
-        - vector_size : int correspondant a la taille des vecteurs du modèle Doc2Vec
+        - vector_size : int correspondant a la taille des vecteurs du modèle Doc2Vec (100 par défaut)
         - n_clusters : int correspondant au nombre de clusters désirés. (3 par défaut)
         - top_n : int correspondant aux nombres de mots clés à extraire. (5 par défaut)
 
@@ -100,10 +100,10 @@ def clustering_avis(avis : list[str], vector_size : int = 100, n_clusters : int 
         mots_cles_format = ', '.join([f"{mot} ({score:.2f})" for mot, score in mots_cles[i]])
         data.append({
             "Cluster": f"Cluster {i + 1}",
-            "Nombres d'avis" : len(liste_avis_clusters[i]),
+            "Nombres_avis" : len(liste_avis_clusters[i]),
             "Polarité": analyse_sent[i]['Polarité'],
             "Subjectivité": analyse_sent[i]['Subjectivité'],
-            "Mots Clés": mots_cles_format,
+            "Mots_Clés": mots_cles_format,
         })
 
     df = pd.DataFrame(data)
