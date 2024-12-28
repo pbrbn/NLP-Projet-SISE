@@ -82,27 +82,30 @@ def clustering_avis(avis : list[str], vector_size : int = 100, n_clusters : int 
     #ANALYSE DES SENTIMENTS 
     analyse_sent = []
     for i in clean_liste_clusters : 
-        sentiments = sentiments_analyse(i)
+        sentiments = sentiments_analyse(i, join = True)
         analyse_sent.append(sentiments)
 
+    #Conversion en liste plate 
+    results_analyse = [d[0] for d in analyse_sent]
+    
     #MOTS-CLES 
     mots_cles = []
     for i in clean_liste_clusters : 
         mots_cles_avis = aggreger_mots_cles(i, top_n=top_n)
         mots_cles.append(mots_cles_avis)
 
-
+    
     ##### SORTIE #####
 
     #Construction du DataFrame
     data = []
-    for i in range(len(analyse_sent)):
+    for i in range(n_clusters):
         mots_cles_format = ', '.join([f"{mot} ({score:.2f})" for mot, score in mots_cles[i]])
         data.append({
             "Cluster": f"Cluster {i + 1}",
             "Nombres_avis" : len(liste_avis_clusters[i]),
-            "Polarité": analyse_sent[i]['Polarité'],
-            "Subjectivité": analyse_sent[i]['Subjectivité'],
+            "Polarité": results_analyse[i]['Polarité'],
+            "Subjectivité": results_analyse[i]['Subjectivité'],
             "Mots_Clés": mots_cles_format,
         })
 
