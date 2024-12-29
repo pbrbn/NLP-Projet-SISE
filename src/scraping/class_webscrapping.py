@@ -101,7 +101,7 @@ class WebScraper:
 
         return pd.DataFrame(results)
 
-    def scrape_infos_resto(self, max_retries=3):
+    def scrape_infos_resto(self, max_retries=5):
         '''
         Permet de relancer la fonction infos_resto tant qu'elle ne sort pas le résultat attendu
         '''
