@@ -1,6 +1,6 @@
 from textblob import TextBlob
 
-def sentiments_analyse(avis : list[str], join : bool = True) -> list:
+def sentiments_analyse(avis : list[str], join : bool = True) -> list[dict]:
     '''
     Cette fonction permet de faire une analyse des sentiments du texte
 

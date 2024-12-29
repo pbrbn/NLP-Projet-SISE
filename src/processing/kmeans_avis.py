@@ -6,7 +6,7 @@ from mots_cles_liste_avis import aggreger_mots_cles
 import pandas as pd
 import spacy
 
-def clustering_avis(avis : list[str], vector_size : int = 100, n_clusters : int = 3, top_n:int = 5) : 
+def clustering_avis(avis : list[str], vector_size : int = 100, n_clusters : int = 3, top_n:int = 5) -> pd.DataFrame : 
     ''' 
     Cette  fonction entraine un modèle K-Means à partir d'une sortie Doc2Vec sur une liste d'avis. 
     Elle permet ensuite d'extraire l'analyse des sentiments et les mots clés pour chaque clusters.
