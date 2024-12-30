@@ -50,6 +50,7 @@ def combine_and_aggregate(infos_avis, infos_resto):
         'commentaire': lambda comments: ' | '.join(comments),  # Joindre les commentaires
         'type_cuisine': 'first',                              # Garder une seule valeur par restaurant
         'fourchette_prix': 'first',
+        'description': 'first',
         'adresse': 'first',
         'note_moyenne': 'first'
     })
