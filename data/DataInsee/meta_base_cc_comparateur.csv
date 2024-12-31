@@ -1,0 +1,42 @@
+COD_VAR;LIB_VAR;LIB_VAR_LONG;COD_MOD;LIB_MOD;TYPE_VAR;LONG_VAR
+P21_POP;Population en 2021;Population en 2021;;;NUM;7
+P15_POP;Population en 2015;Population en 2015;;;NUM;7
+SUPERF;Superficie;Superficie (en km2);;;NUM;16
+NAIS1520;Naissances entre 2015 et 2020;Nombre de naissances entre le 01/01/2015 et le 31/12/2020;;;NUM;6
+DECE1520;Décès entre 2015 et 2020;Nombre de décès entre le 01/01/2015 et le 31/12/2020;;;NUM;5
+P21_MEN;Ménages en 2021;Nombre de ménages en 2021;;;NUM;16
+NAISD22;Nombre de naissances domiciliées en 2022;Nombre de naissances domiciliées en 2022;;;NUM;5
+DECESD22;Nombre de décès domiciliés en 2022;Nombre de décès domiciliés en 2022;;;NUM;5
+P21_LOG;Logements en 2021;Nombre de logements en 2021;;;NUM;16
+P21_RP;Résidences principales en 2021;Nombre de résidences principales en 2021;;;NUM;16
+P21_RSECOCC;Rés secondaires et logts occasionnels en 2021;Nombre de résidences secondaires et logements occasionnels en 2021;;;NUM;17
+P21_LOGVAC;Logements vacants en 2021;Nombre de logements vacants en 2021;;;NUM;17
+P21_RP_PROP;Rés princ occupées Propriétaires en 2021;Nombre de résidences principales occupées par propriétaires en 2021;;;NUM;17
+NBMENFISC21;Nombre de ménages fiscaux en 2021;Nombre de ménages fiscaux en 2021;;;CHAR;7
+PIMP21;Part des ménages fiscaux imposés en 2021;Part des ménages fiscaux imposés en 2021;;;CHAR;4
+MED21;Médiane du niveau vie en 2021;Médiane du niveau de vie en 2021;;;CHAR;5
+TP6021;Taux de pauvreté en 2021;Taux de pauvreté en 2021;;;CHAR;4
+P21_EMPLT;Emplois au LT en 2021;Nombre d'emplois au lieu de travail en 2021;;;NUM;17
+P21_EMPLT_SAL;Emplois salariés au LT en 2021;Nombre d'emplois salariés au lieu de travail en 2021;;;NUM;17
+P15_EMPLT;Emplois au LT en 2015;Nombre d'emplois au lieu de travail en 2015;;;NUM;17
+P21_POP1564;Pop 15-64 ans en 2021;Nombre de personnes de 15 à 64 ans en 2021;;;NUM;16
+P21_CHOM1564;Chômeurs 15-64 ans en 2021;Nombre de chômeurs de 15 à 64 ans en 2021;;;NUM;17
+P21_ACT1564;Actifs 15-64 ans en 2021;Nombre de personnes actives de 15 à 64 ans en 2021;;;NUM;17
+ETTOT22;Total des ets actifs fin 2022;Total des établissements actifs fin 2022;;;NUM;6
+ETAZ22;Ets actifs agriculture fin 2022;Établissements actifs de l'agriculture, sylviculture et pêche fin 2022;;;NUM;3
+ETBE22;Ets actifs industrie fin 2022;Établissements actifs de l'industrie fin 2022;;;NUM;4
+ETFZ22;Ets actifs construction fin 2022;Établissements actifs de la construction fin 2022;;;NUM;4
+ETGU22;Ets actifs commerce services fin 2022;Établissements actifs du commerce, transports et services divers fin 2022;;;NUM;6
+ETGZ22;dont Ets actifs commerce rep auto fin 2022;dont Établissements actifs du commerce et réparation automobile fin 2022;;;NUM;5
+ETOQ22;Ets actifs adm publique fin 2022;Établissements actifs de l'administration publique, enseignement, santé et action sociale fin 2022;;;NUM;5
+ETTEF122;Ets actifs de 1 à 9 salariés fin 2022;Établissements actifs de 1 à 9 salariés fin 2022;;;NUM;6
+ETTEFP1022;Ets actifs 10 salariés ou plus fin 2022;Établissements actifs de 10 salariés ou plus fin 2022;;;NUM;5
+CODGEO;CODGEO;Code du département suivi du numéro de commune ou du numéro d'arrondissement municipal;69381;Lyon 1er Arrondissement;CHAR;5
+CODGEO;CODGEO;Code du département suivi du numéro de commune ou du numéro d'arrondissement municipal;69382;Lyon 2e Arrondissement;CHAR;5
+CODGEO;CODGEO;Code du département suivi du numéro de commune ou du numéro d'arrondissement municipal;69383;Lyon 3e Arrondissement;CHAR;5
+CODGEO;CODGEO;Code du département suivi du numéro de commune ou du numéro d'arrondissement municipal;69384;Lyon 4e Arrondissement;CHAR;5
+CODGEO;CODGEO;Code du département suivi du numéro de commune ou du numéro d'arrondissement municipal;69385;Lyon 5e Arrondissement;CHAR;5
+CODGEO;CODGEO;Code du département suivi du numéro de commune ou du numéro d'arrondissement municipal;69386;Lyon 6e Arrondissement;CHAR;5
+CODGEO;CODGEO;Code du département suivi du numéro de commune ou du numéro d'arrondissement municipal;69387;Lyon 7e Arrondissement;CHAR;5
+CODGEO;CODGEO;Code du département suivi du numéro de commune ou du numéro d'arrondissement municipal;69388;Lyon 8e Arrondissement;CHAR;5
+CODGEO;CODGEO;Code du département suivi du numéro de commune ou du numéro d'arrondissement municipal;69389;Lyon 9e Arrondissement;CHAR;5
