@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import re
 from geopy.geocoders import Nominatim
 
 
@@ -143,6 +144,7 @@ class DBHandling:
                 adresse TEXT,
                 note_moyenne REAL,
                 description TEXT,
+                arrondissement INTEGER,
                 latitude REAL,
                 longitude REAL
             )
@@ -179,21 +181,25 @@ class DBHandling:
             db.insert_restaurant("Le Petit Paris", "Français", "€€", "1 rue de Paris, 75001 Paris", 4.5)
             db.close()
         """
+        # Gestion arrondissement
+        arrondissement = self._extract_postal_code(adresse)
+
         # Get the lat and long from the address
         # Enlever la virgule dans adresse car erreur d'argument
         adresse = adresse.replace(",", "")
-        coords = self.find_coord(str(adresse)) # Use Nominatim to get the coordinates
+        coords = self._find_coord(str(adresse)) # Use Nominatim to get the coordinates
         if coords is None:
             # Quelques fois geopy a du mal avec l'adresse mais peut fonctionner avec le resto + ville
             print(nom)
-            coords = self.find_coord(str(nom + ", Lyon"))
+            coords = self._find_coord(str(nom + ", Lyon"))
         if coords is None:
             print(f"Impossible de trouver les coordonnées pour l'adresse : {adresse}")
         
         latitude, longitude = coords
+        
         try:
-            self.execute_query("INSERT INTO restaurants (nom, type_cuisine, fourchette_prix, adresse, note_moyenne, description, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-                               , (nom, type_cuisine, fourchette_prix, adresse, note_moyenne, description, latitude, longitude))
+            self.execute_query("INSERT INTO restaurants (nom, type_cuisine, fourchette_prix, adresse, note_moyenne, description, arrondissement, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                               , (nom, type_cuisine, fourchette_prix, adresse, note_moyenne, description, arrondissement, latitude, longitude))
             print("Insertion réussie.")
         except sqlite3.Error as e:
             print("Erreur lors de l'insertion.")
@@ -224,7 +230,7 @@ class DBHandling:
     
 
 
-    def find_coord(self, address: str) -> list:
+    def _find_coord(self, address: str) -> list:
         """
         Trouve les coordonnées (latitude, longitude) pour une adresse donnée.
         
@@ -243,5 +249,22 @@ class DBHandling:
             latitude = location.latitude
             longitude = location.longitude
             return [latitude, longitude]
+        return None
+    
+    def _extract_postal_code(self, address: str) -> int:
+        """
+        Extrait le code postal d'une adresse.
+
+        Args:
+            address (str): L'adresse complète.
+
+        Returns:
+            int: Le code postal extrait ou None si non trouvé.
+        """
+        # Regex pattern to match French postal codes (5 digits)
+        pattern = r'\b\d{5}\b'
+        match = re.search(pattern, address)
+        if match:
+            return int(match.group(0))
         return None
     
