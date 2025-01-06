@@ -5,6 +5,9 @@ import plotly.express as px
 import pandas as pd
 import warnings
 import os
+from streamlit_folium import st_folium # type: ignore
+
+from tools_functions_app import *
 
 
 # Ignorer les avertissements
@@ -14,7 +17,7 @@ warnings.filterwarnings("ignore")
 
 # Importation des coordonnées GPS depuis les adresses dans un fichier .csv
 
-filepath_coordonnees = 'C:/Users/Elise/Desktop/NLP/coordonnees.csv'
+filepath_coordonnees = 'app/coordonnees.csv'
 df_coordonnees = pd.read_csv(filepath_or_buffer=filepath_coordonnees,sep=";")
 
 
@@ -73,11 +76,12 @@ elif page == page2_analysis:
 elif page == page3_comparison:
     st.title("Comparison")
     st.write("Compare restaurants on a map.")
-    # Folium map
+    
+    # Folium map initiation
     map = folium.Map(location=[45.764043, 4.850000], zoom_start=12)  # Lyon's coordinates
 
+    # Generating the restaurant markers on the map
     for i in range (0,df_coordonnees.shape[0]):
-    #   nom = df_coordonnees["Nom"][i]
       location = [df_coordonnees["Latitude"][i],df_coordonnees["Longitude"][i]]
       popup_content = f'Nom : {df_coordonnees["Nom"][i]}<br>Note moyenne : {df_coordonnees["Note_moyenne"][i]}<br>Type restaurant : {df_coordonnees["Tags"][i]}'
       popup = folium.Popup(
@@ -86,8 +90,75 @@ elif page == page3_comparison:
             )
       folium.Marker(location, popup=popup).add_to(map)
 
-    # Afficher la carte avec Streamlit
-    st.components.v1.html(map._repr_html_(), height=500)
+    # Affichage de la carte dans Streamlit
+    st_folium_output = st_folium(map, width=700, height=500)
+
+    # Diviser l'espace en deux colonnes
+    col1_affichage, col_selectA, col_selectB = st.columns(3)
+    
+    # Initialisation de la ligne "Sélection de restaurant"
+
+    
+    if not st_folium_output.get("last_object_clicked") :
+        restaurant_sélectionné = str('Sélectionner un restaurant')
+
+
+    # Gestion de la sélection d'un marker
+    if st_folium_output and st_folium_output.get("last_object_clicked"):
+        clicked_object = st_folium_output["last_object_clicked"]
+        lat, lon = clicked_object["lat"], clicked_object["lng"]
+
+        # Trouver la ligne correspondante dans le DataFrame
+        mask = (df_coordonnees['Latitude'] == lat) & (df_coordonnees['Longitude'] == lon)
+        if mask.any():
+            restaurant_sélectionné = df_coordonnees[mask].iloc[0,1]
+
+        else:
+            st.warning("Aucun individu trouvé pour ces coordonnées.")
+
+    # Ligne de sélection d'un restaurant - 3 widgets
+    with col1_affichage :
+        st.markdown(body = f"""
+            <div style="
+                background-color: lightblue;
+                padding: 10px;
+                border-radius: 5px;
+                text-align: center;
+                color: black;
+                font-weight: bold;
+            ">
+                {restaurant_sélectionné}
+            </div>
+        """, unsafe_allow_html=True)
+
+    with col_selectA :
+        button_A = st.button(
+            label='Définir comme restaurant A',
+            use_container_width=True,
+            args=
+            on_click=lambda )
+        
+        if button_A == True :
+            restaurant_A = restaurant_sélectionné
+
+        try :
+            markdown_A = st.markdown(body=f'Restaurant A : {restaurant_A}')
+        except :
+            markdown_A = st.markdown(body=f'sélectionner un restaurant')
+
+    with col_selectB :
+        button_B = st.button(label='Définir comme restaurant B',use_container_width=True)
+        
+        if button_B == True :
+            restaurant_B = restaurant_sélectionné
+
+        try :
+            markdown_B = st.markdown(body=f'Restaurant B : {restaurant_B}')
+        except :
+            markdown_B = st.markdown(body=f'sélectionner un restaurant')
+
+
 
 ####################################################################################
+
 
