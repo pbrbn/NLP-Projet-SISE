@@ -71,7 +71,7 @@ class DBHandling:
         Exemple:
             db = DBHandling()
             db.connect()
-            db.execute_query("CREATE TABLE IF NOT EXISTS restaurants (id INTEGER PRIMARY KEY, nom TEXT, type_cuisine TEXT, fourchette_prix TEXT, adresse TEXT, note_moyenne REAL)")
+            db.execute_query("CREATE TABLE IF NOT EXISTS restaurant (id INTEGER PRIMARY KEY, nom TEXT, type_cuisine TEXT, fourchette_prix TEXT, adresse TEXT, note_moyenne REAL)")
             db.close()
         """
         if not self.conn:
@@ -98,7 +98,7 @@ class DBHandling:
         Exemple:
             db = DBHandling()
             db.connect()
-            rows = db.fetch_all("SELECT * FROM restaurants")
+            rows = db.fetch_all("SELECT * FROM restaurant")
             db.close()
         """
         cursor = self.execute_query(query, params)
@@ -118,7 +118,7 @@ class DBHandling:
         Exemple:
             db = DBHandling()
             db.connect()
-            row = db.fetch_one("SELECT * FROM restaurants WHERE id = ?", (1,))
+            row = db.fetch_one("SELECT * FROM restaurant WHERE id = ?", (1,))
             db.close()
         """
         cursor = self.execute_query(query, params)
@@ -126,7 +126,7 @@ class DBHandling:
 
     def create_tables(self):
         """
-        Crée les tables 'restaurants' et 'avis' dans la base de données.
+        Crée les tables 'restaurant' et 'avis' dans la base de données.
 
         Exemple:
             db = DBHandling()
@@ -136,7 +136,15 @@ class DBHandling:
         """
         try:
             self.execute_query("""
-            CREATE TABLE IF NOT EXISTS restaurants (
+            CREATE TABLE IF NOT EXISTS arrondissement (
+                arrondissement INTEGER PRIMARY KEY,
+                taux_menage_imposable INTEGER,
+                mediane_niveau_de_vie INTEGER,
+                taux_pauvrete INTEGER
+            )
+            """)
+            self.execute_query("""
+                CREATE TABLE IF NOT EXISTS restaurant (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 nom TEXT NOT NULL,
                 type_cuisine TEXT,
@@ -146,7 +154,8 @@ class DBHandling:
                 description TEXT,
                 arrondissement INTEGER,
                 latitude REAL,
-                longitude REAL
+                longitude REAL,
+                FOREIGN KEY (arrondissement) REFERENCES arrondissement(arrondissement)
             )
             """)
             self.execute_query("""
@@ -156,7 +165,7 @@ class DBHandling:
                 date DATE,
                 note REAL,
                 commentaire TEXT,
-                FOREIGN KEY (id_restaurant) REFERENCES restaurants(id)
+                FOREIGN KEY (id_restaurant) REFERENCES restaurant(id)
             )
             """)
             print("Tables créées avec succès.")
@@ -166,7 +175,7 @@ class DBHandling:
     
     def insert_restaurant(self, nom: str, type_cuisine: str, fourchette_prix: str, adresse: str, note_moyenne: float, description: str = "Description non renseigner"):
         """
-        Insère un restaurant dans la table 'restaurants'.
+        Insère un restaurant dans la table 'restaurant'.
 
         Args:
             nom (str): Nom du restaurant.
@@ -174,11 +183,12 @@ class DBHandling:
             fourchette_prix (str): Fourchette de prix du restaurant.
             adresse (str): Adresse du restaurant.
             note_moyenne (float): Note moyenne du restaurant.
+            description (str, optional): Description du restaurant. Par défaut "Description non renseigner".
 
         Exemple:
             db = DBHandling()
             db.connect()
-            db.insert_restaurant("Le Petit Paris", "Français", "€€", "1 rue de Paris, 75001 Paris", 4.5)
+            db.insert_restaurant("Le Petit Paris", "Français", "€€", "1 rue de Paris, 75001 Paris", 4.5, "Petit restaurant français sympa.")
             db.close()
         """
         # Gestion arrondissement
@@ -198,7 +208,7 @@ class DBHandling:
         latitude, longitude = coords
         
         try:
-            self.execute_query("INSERT INTO restaurants (nom, type_cuisine, fourchette_prix, adresse, note_moyenne, description, arrondissement, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+            self.execute_query("INSERT INTO restaurant (nom, type_cuisine, fourchette_prix, adresse, note_moyenne, description, arrondissement, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
                                , (nom, type_cuisine, fourchette_prix, adresse, note_moyenne, description, arrondissement, latitude, longitude))
             print("Insertion réussie.")
         except sqlite3.Error as e:
@@ -228,7 +238,31 @@ class DBHandling:
             print("Erreur lors de l'insertion.")
             print(f"An error occurred: {e}")
     
+    def insert_arrondissement(self, arrondissement: int, taux_menage_imposable: int, mediane_niveau_de_vie: int, taux_pauvrete: int):
+        """
+        Insère un arrondissement dans la table 'arrondissement'.
 
+        Args:
+            arrondissement (int): Code de l'arrondissement.
+            taux_menage_imposable (int): Taux de ménage imposable.
+            mediane_niveau_de_vie (int): Médiane du niveau de vie.
+            taux_pauvrete (int): Taux de pauvreté.
+
+        Exemple:
+            db = DBHandling()
+            db.connect()
+            db.insert_arrondissement(69001, 60, 25980, 15)
+            db.close()
+        """
+        try:
+            self.execute_query(
+                "INSERT INTO arrondissement (arrondissement, taux_menage_imposable, mediane_niveau_de_vie, taux_pauvrete) VALUES (?, ?, ?, ?)",
+                (arrondissement, taux_menage_imposable, mediane_niveau_de_vie, taux_pauvrete)
+            )
+            print(f"Arrondissement {arrondissement} inséré avec succès.")
+        except sqlite3.Error as e:
+            print("Erreur lors de l'insertion de l'arrondissement.")
+            print(f"An error occurred: {e}")
 
     def _find_coord(self, address: str) -> list:
         """
