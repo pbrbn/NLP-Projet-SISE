@@ -1,23 +1,32 @@
+import os
+import sys
+import pandas as pd
+
 import folium
 import streamlit as st
 from streamlit_option_menu import option_menu
-import plotly.express as px
-import pandas as pd
-import warnings
-import os
 from streamlit_folium import st_folium # type: ignore
+import plotly.express as px
 
-from tools_functions_app import *
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src', 'scraping')))
+from restaurant_scraper import RestaurantScraper
 
 
-# Ignorer les avertissements
-warnings.filterwarnings("ignore")
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src', 'processing')))
+from data_handler import DataHandler
+
+
 
 #################### Données factices pour test de l'interface ##################
 
 # Importation des coordonnées GPS depuis les adresses dans un fichier .csv
 
-filepath_coordonnees = 'app/coordonnees.csv'
+# Définition du chemin du répertoire courant (dossier 'app')
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Définition du chemin vers 'coordonnees.csv'
+filepath_coordonnees = os.path.join(current_dir, 'coordonnees.csv')
 df_coordonnees = pd.read_csv(filepath_or_buffer=filepath_coordonnees,sep=";")
 
 
@@ -49,16 +58,31 @@ with st.sidebar:
 
 if page == page1_add_restaurant:
     st.title("Add a Restaurant")
-    st.write("Use this page to add a new restaurant.")
-    # Exemple de formulaire pour ajouter un restaurant
+    st.write("Paste a Trip Advisor URL to add a new restaurant to the database")
+
+    # Formulaire pour ajouter une URL Tripadvisor
     with st.form(key="add_restaurant"):
-        name = st.text_input("Restaurant Name")
-        rating = st.slider("Rating", 0.0, 5.0, step=0.1)
-        reviews = st.number_input("Number of Reviews", min_value=0, step=1)
+        url = str(st.text_input("Restaurant URL (must be from a Trip Advisor page)"))
         submit_button = st.form_submit_button("Submit")
         
         if submit_button:
-            st.success(f"Restaurant {name} with rating {rating} added!")
+            # Lance le scraping à partir de l'URL
+            rscrap = RestaurantScraper(base_url=url)
+            df_info_avis_new = rscrap.scrape_infos_avis()
+            df_info_resto_new = rscrap.scrape_infos_resto()
+            nom_new = df_info_resto_new.iloc[0,0]
+            
+            # Aggregation dans un seul dataframe
+
+            dh = DataHandler()
+            # df_aggregate = datahandler.combine_and_aggregate(df_info_avis_new,df_info_resto_new)
+            
+            dh.save_preprocessed_data(data=df_info_avis_new,filename=f'{nom_new}')
+
+            st.success(f"New restaurant '{nom_new}' added") # AJOUTER LE NOM DU RESTAURANT EN DYNAMIQUE
+            st.dataframe(df_info_resto_new)
+            st.dataframe(df_info_avis_new)
+            # st.dataframe(aggregate)
 
 
 # Page to analyze 1 restaurant ----------------------------------------------------------
@@ -134,9 +158,7 @@ elif page == page3_comparison:
     with col_selectA :
         button_A = st.button(
             label='Définir comme restaurant A',
-            use_container_width=True,
-            args=
-            on_click=lambda )
+            use_container_width=True)
         
         if button_A == True :
             restaurant_A = restaurant_sélectionné
