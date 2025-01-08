@@ -38,23 +38,3 @@ class KeywordExtractor:
         global_keywords = sorted(aggregation.items(), key=lambda x: x[1], reverse=True)
         return global_keywords[:top_n]
     
-
-# # Exemple d'utilisation
-# if __name__ == "__main__":
-#     reviews = [
-#         "Très bon repas Service rapide Cuisine excellente Restaurant agréable",
-#         "Service rapide et efficace Cuisine correcte mais sans plus",
-#         "Repas décevant Service lent et peu aimable Restaurant bruyant",
-#         "Cuisine excellente Service agréable et efficace Restaurant calme"
-#     ]
-    
-#     keyword_extractor = KeywordExtractor()
-#     keywords_per_review = keyword_extractor.extract_keywords(reviews)
-#     global_keywords = keyword_extractor.aggregate_keywords(reviews)
-    
-#     print("Mots-clés par avis:")
-#     for review, keywords in keywords_per_review.items():
-#         print(f"{review}: {keywords}")
-    
-#     print("\nMots-clés globaux:")
-#     print(global_keywords)
