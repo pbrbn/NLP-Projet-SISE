@@ -2,7 +2,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, accuracy_score
-from processing.data_handler import DataHandler
+from .text_preprocessor import TextPreprocessor
+from .data_handler import DataHandler
 
 class RestaurantClassifier:
     def __init__(self):
