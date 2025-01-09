@@ -109,6 +109,7 @@ class RestaurantScraper:
         attempts = 0
         while attempts < max_retries:
             try:
+                time.sleep(1 + (2 * random.random()))
                 return self._infos_resto()
             except Exception as e:
                 attempts += 1
@@ -126,14 +127,22 @@ class RestaurantScraper:
 
         #Initialisation
         fourchette_resto = []
+        type_c = []
 
         #Nom du restaurant
         nom_resto = [nom.text for nom in soup.find_all('h1', {'class': 'biGQs _P egaXP rRtyp'})]
 
         #Type de cuisine
         borne_tc = soup.find_all('div', {'class': 'biGQs _P pZUbB alXOW oCpZu GzNcM nvOhm UTQMg ZTpaU W hmDzD'})
-        type_c = [tc.text for tc in borne_tc[1]] if len(borne_tc) > 1 else ["NA"]
 
+        #Boucle pour trouver la balise soeur correspondante
+        for div in borne_tc:
+            soeur = div.find_previous_sibling('div', class_="Wf")
+            if soeur and soeur.text.strip() == 'CUISINES':
+                type_c.append(div.text.strip())
+            else :
+                type_c.append("NA")
+        
         #Fourchette de prix
         borne_four = soup.find('div', {'class': 'biGQs _P pZUbB alXOW oCpZu GzNcM nvOhm UTQMg ZTpaU W hmDzD'})
         if borne_four:
