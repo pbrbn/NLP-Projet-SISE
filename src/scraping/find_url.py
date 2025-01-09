@@ -43,6 +43,6 @@ def find_url_restaurant(nom_resto:str) -> str :
 
     #Cherche le lien du restaurant
     lien = soup.find('a', jsname = "UWckNb")
-    url = lien["href"]
+    url_resto = lien["href"]
 
-    return url
+    return url_resto
