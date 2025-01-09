@@ -140,9 +140,10 @@ class RestaurantScraper:
             soeur = div.find_previous_sibling('div', class_="Wf")
             if soeur and soeur.text.strip() == 'CUISINES':
                 type_c.append(div.text.strip())
-            else :
-                type_c.append("NA")
         
+        if not type_c:
+            type_c.append("NA")
+            
         #Fourchette de prix
         borne_four = soup.find('div', {'class': 'biGQs _P pZUbB alXOW oCpZu GzNcM nvOhm UTQMg ZTpaU W hmDzD'})
         if borne_four:
