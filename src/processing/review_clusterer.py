@@ -14,25 +14,21 @@ class ReviewClusterer:
         
     def cluster_reviews(self, reviews: list[str], n_clusters: int = 3, top_n: int = 5) -> pd.DataFrame:
         """Regroupe les avis en clusters et analyse chaque cluster"""
-        # Prétraitement
-        processed_reviews = self.text_preprocessor.preprocess_comments(reviews)
-        tokenized_reviews = self.text_preprocessor.tokenize_comments(processed_reviews)
-        
         # Doc2Vec
-        tagged_reviews = [TaggedDocument(review, [i]) for i, review in enumerate(tokenized_reviews)]
+        tagged_reviews = [TaggedDocument(review, [i]) for i, review in enumerate(reviews)]
         model = Doc2Vec(vector_size=self.vector_size, window=2, min_count=1, workers=4, epochs=10)
         model.build_vocab(tagged_reviews)
         model.train(tagged_reviews, total_examples=model.corpus_count, epochs=model.epochs)
         
         # K-Means clustering
-        vectors = [model.dv[i] for i in range(len(tokenized_reviews))]
+        vectors = [model.dv[i] for i in range(len(reviews))]
         kmeans = KMeans(n_clusters=n_clusters, random_state=0).fit(vectors)
         labels = kmeans.labels_
         
         # Analyse des clusters
         clusters_data = []
         for i in range(n_clusters):
-            cluster_reviews = [review for j, review in enumerate(processed_reviews) if labels[j] == i]
+            cluster_reviews = [review for j, review in enumerate(reviews) if labels[j] == i]
             sentiments = self.sentiment_analyzer.analyze_sentiments(cluster_reviews, join=True)[0]
             keywords = self.keyword_extractor.aggregate_keywords(cluster_reviews, top_n=top_n)
             

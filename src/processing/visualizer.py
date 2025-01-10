@@ -13,16 +13,16 @@ class Visualizer:
     Classe pour gérer la visualisation des données textuelles et des résultats d'analyse.
     """
     
-    def __init__(self, style: str = 'seaborn'):
+    def __init__(self, style: str = 'default'):
         """
         Initialise le visualiseur avec un style spécifique.
         
         Args:
-            style: Style matplotlib à utiliser ('seaborn', 'classic', etc.)
+            style: Style matplotlib à utiliser ('default', 'classic', etc.)
         """
         self.logger = logging.getLogger(__name__)
         self._setup_logging()
-        plt.style.use(style)
+        sns.set_style("whitegrid")
         
     def _setup_logging(self):
         """Configure le logging pour la classe."""
@@ -73,14 +73,7 @@ class Visualizer:
             plt.figure(figsize=(width/100, height/100))
             plt.imshow(wordcloud, interpolation='bilinear')
             plt.title(title, fontsize=16, pad=20)
-            plt.axis('off')
-            
-            if output_file:
-                # Créer le dossier de sortie s'il n'existe pas
-                os.makedirs(os.path.dirname(output_file), exist_ok=True)
-                plt.savefig(output_file, format='png', bbox_inches='tight', dpi=300)
-                self.logger.info(f"Nuage de mots sauvegardé dans {output_file}")
-            
+            plt.axis('off') 
             plt.show()
             plt.close()
             
