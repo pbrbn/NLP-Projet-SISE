@@ -1,14 +1,17 @@
 from mistralai import Mistral
+import os
+from dotenv import load_dotenv
 
-#Clé API Hugging Face
-MISTRAL_API_KEY = "A mettre dans un fichier .env"
+load_dotenv()
+
+MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
 
 class ResumerAvis:
     """
     Classe pour générer un résumé à partir d'une liste d'avis en utilisant l'API Mistral.
     """
 
-    def __init__(self, api_key: str, model: str = "open-mistral-nemo-2407", max_length: int = 3500, type_query: str = "analyze_1"):
+    def __init__(self, api_key = MISTRAL_API_KEY, model: str = "open-mistral-nemo-2407", max_length: int = 3500, type_query: str = "analyze_1"):
         """
         Initialise l'instance de la classe avec les paramètres nécessaires.
 
