@@ -1,7 +1,7 @@
 from mistralai import Mistral
 
 #Clé API Hugging Face
-MISTRAL_API_KEY = "2k1TQKSWW9cyokDxZYtrtuv6ZhvL6cD8"
+MISTRAL_API_KEY = "A mettre dans un fichier .env"
 
 class ResumerAvis:
     """
