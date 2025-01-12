@@ -11,10 +11,12 @@ import plotly.express as px
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src', 'scraping')))
 from restaurant_scraper import RestaurantScraper
+from find_url import find_url_restaurant
 
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src', 'processing')))
-from data_handler import DataHandler
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src', 'database_handling')))
+from database_handling import DBHandling
+
 
 
 
@@ -47,7 +49,7 @@ with st.sidebar:
         [page1_add_restaurant,page2_analysis,page3_comparison], 
         icons=['plus', 'bar-chart-fill', 'calculator'], 
         menu_icon="house",
-        default_index=1
+        default_index=0
     )
 
 ####################################################################################
@@ -57,32 +59,78 @@ with st.sidebar:
 # Page to add a new restaurant in the database -------------------------------------
 
 if page == page1_add_restaurant:
-    st.title("Add a Restaurant")
-    st.write("Paste a Trip Advisor URL to add a new restaurant to the database")
+    st.title("Add a restaurant to the database")
+    st.write("Type a restaurant name - the app will google-search it for you")
 
     # Formulaire pour ajouter une URL Tripadvisor
     with st.form(key="add_restaurant"):
-        url = str(st.text_input("Restaurant URL (must be from a Trip Advisor page)"))
-        submit_button = st.form_submit_button("Submit")
+        nom_resto_user = str(st.text_input("Restaurant name"))
         
-        if submit_button:
-            # Lance le scraping à partir de l'URL
-            rscrap = RestaurantScraper(base_url=url)
-            df_info_avis_new = rscrap.scrape_infos_avis()
+        url_resto = find_url_restaurant(nom_resto_user)
+        
+        search_button = st.form_submit_button("Search")
+        
+        # Recherche d'un restaurant correspondant au nom saisi par l'utilisateur
+        if search_button:
+            # Lance le scraping des information du restaurant à partir de l'URL générée par 'find_url_restaurant'
+            rscrap = RestaurantScraper(base_url=url_resto)
+            
             df_info_resto_new = rscrap.scrape_infos_resto()
             nom_new = df_info_resto_new.iloc[0,0]
-            
-            # Aggregation dans un seul dataframe
+            type_cuisine_new = df_info_resto_new.iloc[0,1]
+            adress_new = df_info_resto_new.iloc[0,3]
 
-            dh = DataHandler()
-            # df_aggregate = datahandler.combine_and_aggregate(df_info_avis_new,df_info_resto_new)
             
-            dh.save_preprocessed_data(data=df_info_avis_new,filename=f'{nom_new}')
+            # Affichage des information avant ajout à la database
+            st.success(f"Restaurant found")
 
-            st.success(f"New restaurant '{nom_new}' added") # AJOUTER LE NOM DU RESTAURANT EN DYNAMIQUE
+            st.write(f'Nom du restaurant : {nom_new}')
+            st.write(f'Cuisine type : {type_cuisine_new}')
+            st.write(f'Adress : {adress_new}')
+
+        # Ajout du restaurant à la database
+
+        add_to_db_button=st.form_submit_button("Click here to add to database",type="primary")
+        
+        if add_to_db_button: 
+            # Scrapping complet du restaurant sut Tripadvisor
+            rscrap = RestaurantScraper(base_url=url_resto)
+            df_info_resto_new = rscrap.scrape_infos_resto()
+            # df_description_new =
+            df_info_avis_new = rscrap.scrape_infos_avis()
+
+            
+            nom_new = df_info_resto_new.iloc[0,0]
+            type_cuisine_new = df_info_resto_new.iloc[0,1]
+            fourchette_prix_new = df_info_resto_new.iloc[0,2]
+            adress_new = df_info_resto_new.iloc[0,3]
+            note_moy_new = df_info_resto_new.iloc[0,4]
+
+
+            Ajout à la database
+            db = DBHandling()
+            db.connect()
+                # Ajout des informations du restaurant
+            db.insert_restaurant(nom=nom_new,
+                                 type_cuisine=type_cuisine_new,
+                                 fourchette_prix=fourchette_prix_new,
+                                 adresse=adress_new, 
+                                 note_moyenne=note_moy_new,
+                                 #description: str = "Description non renseigner"
+                                 )
+                # Ajout des avis
+            db.inster_avis()
+            db.close()
+            
+            
+            st.success(f"Restaurant added to database")
+
+
+
+
+            # PRINT DES RESULTATS POUR TESTS DE L'APPLI
             st.dataframe(df_info_resto_new)
-            st.dataframe(df_info_avis_new)
-            # st.dataframe(aggregate)
+            st.dataframe(df_info_avis_new.head(5))
 
 
 # Page to analyze 1 restaurant ----------------------------------------------------------
