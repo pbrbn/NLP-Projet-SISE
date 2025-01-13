@@ -1,6 +1,7 @@
 import os
 import sys
 import pandas as pd
+import sqlite3
 
 import folium
 import streamlit as st
@@ -24,14 +25,22 @@ from database_handling import DBHandling
 
 # Importation des coordonnées GPS depuis les adresses dans un fichier .csv
 
-# Définition du chemin du répertoire courant (dossier 'app')
-current_dir = os.path.dirname(os.path.abspath(__file__))
+# # Définition du chemin du répertoire courant (dossier 'app')
+# current_dir = os.path.dirname(os.path.abspath(__file__))
 
-# Définition du chemin vers 'coordonnees.csv'
-filepath_coordonnees = os.path.join(current_dir, 'coordonnees.csv')
-df_coordonnees = pd.read_csv(filepath_or_buffer=filepath_coordonnees,sep=";")
+# # Définition du chemin vers 'coordonnees.csv'
+# filepath_coordonnees = os.path.join(current_dir, 'coordonnees.csv')
+# df_coordonnees = pd.read_csv(filepath_or_buffer=filepath_coordonnees,sep=";")
 
+# Récupération des données depuis la database
+db = DBHandling("../data/database.db")
+db.connect()
+conn = sqlite3.connect("../data/database.db")
+query = 'select * from restaurant'
+info_resto = pd.read_sql_query(query,conn)
+st.write(info_resto.head())
 
+db.close()
 
 ####################################################################################
 ############################# Sidebar menu #########################################
@@ -107,20 +116,20 @@ if page == page1_add_restaurant:
             note_moy_new = df_info_resto_new.iloc[0,4]
 
 
-            # #Ajout à la database
-            # db = DBHandling("../../data/database.db")
-            # db.connect()
-            #     # Ajout des informations du restaurant
-            # db.insert_restaurant(nom=nom_new,
-            #                      type_cuisine=type_cuisine_new,
-            #                      fourchette_prix=fourchette_prix_new,
-            #                      adresse=adress_new, 
-            #                      note_moyenne=note_moy_new,
-            #                      #description: str = "Description non renseigner"
-            #                      )
-            #     # Ajout des avis
-            # #db.insert_avis()
-            # db.close()
+            #Ajout à la database
+
+            db.connect()
+                # Ajout des informations du restaurant
+            db.insert_restaurant(nom=nom_new,
+                                 type_cuisine=type_cuisine_new,
+                                 fourchette_prix=fourchette_prix_new,
+                                 adresse=adress_new, 
+                                 note_moyenne=note_moy_new,
+                                 description = "Description non renseigner"
+                                 )
+                # Ajout des avis
+            # db.insert_avis()
+            db.close()
             
             
             st.success(f"Restaurant added to database")
