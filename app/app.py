@@ -96,7 +96,7 @@ if page == page1_add_restaurant:
             # Scrapping complet du restaurant sut Tripadvisor
             rscrap = RestaurantScraper(base_url=url_resto)
             df_info_resto_new = rscrap.scrape_infos_resto()
-            # df_description_new =
+            # df_description_new = rscrap.scrape_description_resto()
             df_info_avis_new = rscrap.scrape_infos_avis()
 
             
@@ -107,20 +107,20 @@ if page == page1_add_restaurant:
             note_moy_new = df_info_resto_new.iloc[0,4]
 
 
-            # Ajout à la database
-            db = DBHandling()
-            db.connect()
-                # Ajout des informations du restaurant
-            db.insert_restaurant(nom=nom_new,
-                                 type_cuisine=type_cuisine_new,
-                                 fourchette_prix=fourchette_prix_new,
-                                 adresse=adress_new, 
-                                 note_moyenne=note_moy_new,
-                                 #description: str = "Description non renseigner"
-                                 )
-                # Ajout des avis
-            db.inster_avis()
-            db.close()
+            # #Ajout à la database
+            # db = DBHandling("../../data/database.db")
+            # db.connect()
+            #     # Ajout des informations du restaurant
+            # db.insert_restaurant(nom=nom_new,
+            #                      type_cuisine=type_cuisine_new,
+            #                      fourchette_prix=fourchette_prix_new,
+            #                      adresse=adress_new, 
+            #                      note_moyenne=note_moy_new,
+            #                      #description: str = "Description non renseigner"
+            #                      )
+            #     # Ajout des avis
+            # #db.insert_avis()
+            # db.close()
             
             
             st.success(f"Restaurant added to database")
@@ -130,6 +130,7 @@ if page == page1_add_restaurant:
 
             # PRINT DES RESULTATS POUR TESTS DE L'APPLI
             st.dataframe(df_info_resto_new)
+            #st.write(description_new)
             st.dataframe(df_info_avis_new.head(5))
 
 
@@ -139,17 +140,7 @@ elif page == page2_analysis:
     st.title("Analysis")
     st.write("Analyze restaurant data.")
     
-
-
-
-
-# Page to compare 2 restaurants ----------------------------------------------------------
-
-elif page == page3_comparison:
-    st.title("Comparison")
-    st.write("Compare restaurants on a map.")
-    
-    # Folium map initiation
+# Folium map initiation
     map = folium.Map(location=[45.764043, 4.850000], zoom_start=12)  # Lyon's coordinates
 
     # Generating the restaurant markers on the map
@@ -166,7 +157,7 @@ elif page == page3_comparison:
     st_folium_output = st_folium(map, width=700, height=500)
 
     # Diviser l'espace en deux colonnes
-    col1_affichage, col_selectA, col_selectB = st.columns(3)
+    col1_affichage, col_selectA = st.columns(2)
     
     # Initialisation de la ligne "Sélection de restaurant"
 
@@ -193,7 +184,7 @@ elif page == page3_comparison:
         st.markdown(body = f"""
             <div style="
                 background-color: lightblue;
-                padding: 10px;
+                padding: 7.5px;
                 border-radius: 5px;
                 text-align: center;
                 color: black;
@@ -205,27 +196,29 @@ elif page == page3_comparison:
 
     with col_selectA :
         button_A = st.button(
-            label='Définir comme restaurant A',
-            use_container_width=True)
+            label='Analyze this restaurant',
+            use_container_width=True,
+            type="primary")
         
         if button_A == True :
             restaurant_A = restaurant_sélectionné
 
-        try :
-            markdown_A = st.markdown(body=f'Restaurant A : {restaurant_A}')
-        except :
-            markdown_A = st.markdown(body=f'sélectionner un restaurant')
+    # TEST POUR L'APPLI (valider la sélection d'un restaurant)############
+    try :
+        st.write(restaurant_A) 
+    except :
+        st.write('Select a restaurant on the map to start and launch analysis')
+    ################
 
-    with col_selectB :
-        button_B = st.button(label='Définir comme restaurant B',use_container_width=True)
-        
-        if button_B == True :
-            restaurant_B = restaurant_sélectionné
 
-        try :
-            markdown_B = st.markdown(body=f'Restaurant B : {restaurant_B}')
-        except :
-            markdown_B = st.markdown(body=f'sélectionner un restaurant')
+
+
+# Page to compare 2 restaurants ----------------------------------------------------------
+
+elif page == page3_comparison:
+    st.title("Comparison")
+    st.write("Compare restaurants on a map.")
+
 
 
 
