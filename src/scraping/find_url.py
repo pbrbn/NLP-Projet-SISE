@@ -42,7 +42,12 @@ def find_url_restaurant(nom_resto:str) -> str :
     soup = BeautifulSoup(response.text, "html.parser")
 
     #Cherche le lien du restaurant
-    lien = soup.find('a', jsname = "UWckNb")
-    url_resto = lien["href"]
+    for lien in soup.find_all('a', jsname = "UWckNb"):
+        url_resto = lien.get("href")
 
-    return url_resto
+        if "tripadvisor.fr/Restaurant_Review" in url_resto :
+            return url_resto
+        
+    #Si il ne le trouve pas
+    print("Aucun lien Tripadvisor valide trouvé.")
+    return None
