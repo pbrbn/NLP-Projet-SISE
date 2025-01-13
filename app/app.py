@@ -107,7 +107,7 @@ if page == page1_add_restaurant:
             note_moy_new = df_info_resto_new.iloc[0,4]
 
 
-            Ajout à la database
+            # Ajout à la database
             db = DBHandling()
             db.connect()
                 # Ajout des informations du restaurant
