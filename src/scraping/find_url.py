@@ -49,5 +49,5 @@ def find_url_restaurant(nom_resto:str) -> str :
             return url_resto
         
     #Si il ne le trouve pas
-    print("Aucun lien Tripadvisor valide trouvé.")
+    print("Aucun lien Tripadvisor valide trouvé. Merci de vérifier si il s'agit bien d'un restaurant et non d'une 'activité' sur TripAdvisor. \nSinon, n'hésitez pas à ajouter le nom de la ville/arrondissement dans lequel se situe le restaurant.")
     return None
