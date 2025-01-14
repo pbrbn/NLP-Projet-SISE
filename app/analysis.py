@@ -241,7 +241,7 @@ def analyze_restaurant(df, selected_restaurant):
     else:
         st.warning("Aucun avis disponible pour ce restaurant.")
 
-def main():
+def page_analyse_restaurant():
     st.sidebar.title("Restaurant Review Analysis")
     st.sidebar.write("Welcome to the Restaurant Review Analysis app!")
     st.sidebar.write("Select a restaurant from the dropdown menu to view detailed information and sentiment analysis.")
@@ -260,5 +260,5 @@ def main():
     analyze_restaurant(df, selected_restaurant)
 
 if __name__ == '__main__':
-    main()
+   page_analyse_restaurant()
 
