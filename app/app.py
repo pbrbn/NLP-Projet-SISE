@@ -146,6 +146,11 @@ if page == page1_add_restaurant:
             #st.write(description_new)
             st.dataframe(df_info_avis_new.head(5))
 
+
+
+    #################  ANALYSE INSEE  #################### -> placement temporaire
+    ###################################################### 
+    ###################################################### 
     # Temp create plotly graph with stacked bar chart
     # Jointure arrondissement et restaurant 
     db.connect()
@@ -159,15 +164,36 @@ if page == page1_add_restaurant:
     final_table = pd.merge(info_resto, info_arrondissement, on='arrondissement', how='inner')
     db.close()
 
-    st.write(final_table.head())
+    # Convertir les valeurs des arrondissements en entiers pour les arrondir
+    final_table['arrondissement'] = final_table['arrondissement'].astype(int).astype(str)
 
-    # Création du graphique
-    # Création du graphique
-    fig = px.histogram(final_table, x='arrondissement', color='categorie_prix', barmode='stack',
-                    title='Nombre de restaurants par arrondissement et catégorie de prix',
-                    labels={'arrondissement': 'Arrondissement', 'count': 'Nombre de restaurants'})
+    # Transformer les valeurs de catégories de prix
+    final_table['categorie_prix'] = final_table['categorie_prix'].replace({
+        '€': '€ : Pas cher et rapide',
+        '€€-€€€': '€€-€€ : Intermédiaire',
+        '€€€€': '€€€€ : Restaurant gourmet'
+    })
+
+    # Filtrer les données pour ne conserver que les arrondissements 69002 et 69008
+    filtered_table = final_table[final_table['arrondissement'].isin(['69002', '69008'])]
+
+    # Calculer les proportions
+    proportion_table = filtered_table.groupby(['arrondissement', 'categorie_prix']).size().reset_index(name='count')
+    total_counts = proportion_table.groupby('arrondissement')['count'].transform('sum')
+    proportion_table['proportion'] = proportion_table['count'] / total_counts
+
+    st.title('Analyse des restaurants par arrondissement et catégorie de prix')
+    st.write(info_arrondissement.head())
+
+    # Création du graphique en barres avec les proportions
+    fig = px.bar(proportion_table, x='arrondissement', y='proportion', color='categorie_prix', barmode='stack',
+                title='Proportion de restaurants par arrondissement et catégorie de prix',
+                labels={'arrondissement': 'Arrondissement', 'proportion': 'Proportion'})
     st.plotly_chart(fig)
+    
 
+    ###################################################### 
+    ######################################################
 
 # Page to analyze 1 restaurant ----------------------------------------------------------
 
