@@ -88,6 +88,8 @@ if page == page1_add_restaurant:
             nom_new = df_info_resto_new.iloc[0,0]
             type_cuisine_new = df_info_resto_new.iloc[0,1]
             adress_new = df_info_resto_new.iloc[0,3]
+            categorie_prix_new = df_info_resto_new.iloc[0, 5]
+
 
             
             # Affichage des information avant ajout à la database
@@ -114,6 +116,7 @@ if page == page1_add_restaurant:
             fourchette_prix_new = df_info_resto_new.iloc[0,2]
             adress_new = df_info_resto_new.iloc[0,3]
             note_moy_new = df_info_resto_new.iloc[0,4]
+            categorie_prix_new = df_info_resto_new.iloc[0, 5]
 
 
             #Ajout à la database
@@ -125,7 +128,8 @@ if page == page1_add_restaurant:
                                  fourchette_prix=fourchette_prix_new,
                                  adresse=adress_new, 
                                  note_moyenne=note_moy_new,
-                                 description = "Description non renseigner"
+                                 description = "Description non renseigner",
+                                 categorie_prix=categorie_prix_new
                                  )
                 # Ajout des avis
             # db.insert_avis()
@@ -153,12 +157,16 @@ if page == page1_add_restaurant:
     info_arrondissement = pd.read_sql_query(query,conn)
     # Jointure des deux tables sur arrondissement
     final_table = pd.merge(info_resto, info_arrondissement, on='arrondissement', how='inner')
+    db.close()
 
     st.write(final_table.head())
 
-    # mappage fourchette de prix
-
-    db.close()
+    # Création du graphique
+    # Création du graphique
+    fig = px.histogram(final_table, x='arrondissement', color='categorie_prix', barmode='stack',
+                    title='Nombre de restaurants par arrondissement et catégorie de prix',
+                    labels={'arrondissement': 'Arrondissement', 'count': 'Nombre de restaurants'})
+    st.plotly_chart(fig)
 
 
 # Page to analyze 1 restaurant ----------------------------------------------------------
