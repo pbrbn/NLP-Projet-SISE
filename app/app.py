@@ -183,13 +183,17 @@ if page == page1_add_restaurant:
     proportion_table['proportion'] = proportion_table['count'] / total_counts
 
     st.title('Analyse des restaurants par arrondissement et catégorie de prix')
-    st.write(info_arrondissement.head())
+    st.write(info_arrondissement) 
 
     # Création du graphique en barres avec les proportions
     fig = px.bar(proportion_table, x='arrondissement', y='proportion', color='categorie_prix', barmode='stack',
                 title='Proportion de restaurants par arrondissement et catégorie de prix',
                 labels={'arrondissement': 'Arrondissement', 'proportion': 'Proportion'})
     st.plotly_chart(fig)
+
+    # Table qui montre les comparaisons de richesse des arrondissements
+    st.write(proportion_table)
+    
     
 
     ###################################################### 
