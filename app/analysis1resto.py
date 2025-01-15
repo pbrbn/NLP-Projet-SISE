@@ -257,7 +257,7 @@ def analyze_restaurant(df, selected_restaurant):
 def analyse_restaurant():
     
     # Création des onglets
-    tab1, tab2= st.tabs(["Analyse restauant","Analyse IA"])
+    tab1, tab2= st.tabs(["Analyse restauant","Assistant IA"])
 
     # Onglet 1: Analyse statistique existante
     with tab1:

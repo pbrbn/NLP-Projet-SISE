@@ -21,7 +21,7 @@ import streamlit as st
 st.set_page_config(page_title="Application de Gestion de Restaurants", page_icon="🍴")
 
 # Titre principal
-st.title("🍴 Application de Gestion de Restaurants")
+st.title("🍴 streaApplication de Gestion de Restaurants")
 
 # Menu de navigation avec option_menu
 with st.sidebar:

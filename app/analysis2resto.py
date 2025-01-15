@@ -287,10 +287,10 @@ def comparaison_deux_resto():
                 Alors, prêt à devenir un véritable critique culinaire ? C'est parti !
 """)
     # Onglets principaux
-    tabs = st.tabs(["Comparer deux restaurants", "Autre fonctionnalité"])
+    tab1, tab2= st.tabs(["Comparer deux restaurants", "Assistant IA"])
 
     # Onglet Accueil
-    with tabs[0]:
+    with tab1:
 
         filtered_df = filter_restaurants(df)
 
@@ -315,7 +315,7 @@ def comparaison_deux_resto():
             st.info("Veuillez sélectionner exactement deux restaurants à comparer.")
 
     # Onglet Comparer deux restaurants
-    with tabs[1]:
+    with tab2:
         st.title("Comparer deux restaurants")
 
 if __name__ == "__main__":
