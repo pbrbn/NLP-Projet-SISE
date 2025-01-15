@@ -15,28 +15,33 @@ import random
 import folium
 from streamlit_folium import st_folium
 from geopy.distance import geodesic
-
-# Charger le modèle de langue française de spaCy
+from utils import conexion_db
 nlp = spacy.load('fr_core_news_md')
 
 # Définition du chemin du répertoire courant
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '..', 'src')))
 
-from processing.data_handler import DataHandler
-from processing.text_preprocessor import TextPreprocessor
-from processing.restaurant_classifier import RestaurantClassifier
-from processing.review_clusterer import ReviewClusterer
 from processing.sentiment_analyzer import SentimentAnalyzer
 from processing.keyword_extractor import KeywordExtractor
+from processing.resume_avis import ResumerAvis
 
-data_path = "../data/DataClean/restaurants_data.csv"
+
+# Chemin vers la DB
+# db_path = os.path.abspath(os.path.join(os.getcwd(), '..', 'data', 'database.db'))
+# df = conexion_db(db_path)
+
+
+
+# charger les données
 
 def load_data():
-    """Charge les données depuis le CSV et convertit la note en float."""
-    df = pd.read_csv(data_path)
+    #charger les données
+    df = pd.read_csv("data_100.csv")
     return df
 
+
 df = load_data()
+
 
 # Extraction des prix
 def extract_price_range(price_string):
@@ -270,34 +275,48 @@ def plot_comparison_chart(restaurant_data):
 
     return fig
 
+
+# Initialiser la classe ResumerAvis
+MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
+resumer_avis = ResumerAvis(api_key=MISTRAL_API_KEY)
+
 def comparaison_deux_resto():
     st.sidebar.title("Comparer deux restaurants")
     st.markdown("""**Vous etes la parceque vous avez faim ou vous prevoyez quelque chose de speciale ?**
                 Vous avez toujours rêvé de savoir quel restaurant mérite vraiment vos papilles ? Cette page est faite pour vous ! Comparez deux restaurants en fonction de leur type de cuisine, de leur fourchette de prix et de leur note moyenne. Et si vous êtes du genre à vouloir le meilleur pour moins cher, vous pouvez même filtrer les restaurants selon vos critères préférés.
                 Alors, prêt à devenir un véritable critique culinaire ? C'est parti !
 """)
+    # Onglets principaux
+    tabs = st.tabs(["Comparer deux restaurants", "Autre fonctionnalité"])
 
+    # Onglet Accueil
+    with tabs[0]:
 
+        filtered_df = filter_restaurants(df)
 
-    filtered_df = filter_restaurants(df)
+        if filtered_df.empty:
+            st.warning("Aucun restaurant ne correspond à vos critères de sélection.")
+            return
 
-    if filtered_df.empty:
-        st.warning("Aucun restaurant ne correspond à vos critères de sélection.")
-        return
+        restaurant_choices = st.sidebar.multiselect(
+            "Sélectionnez deux restaurants à comparer:",
+            filtered_df['nom_resto'].unique(),
+            max_selections=2
+        )
 
-    restaurant_choices = st.sidebar.multiselect(
-        "Sélectionnez deux restaurants à comparer:",
-        filtered_df['nom_resto'].unique(),
-        max_selections=2
-    )
+        if len(restaurant_choices) == 2:
+            restaurants_data = [filtered_df[filtered_df['nom_resto'] == name].iloc[0] for name in restaurant_choices]
+            user_location = get_user_location()
+            display_comparison(restaurants_data, user_location, df)
+            # Appel du graphique
+            fig = plot_comparison_chart(restaurants_data)
+            st.plotly_chart(fig)
+        else:
+            st.info("Veuillez sélectionner exactement deux restaurants à comparer.")
 
-    if len(restaurant_choices) == 2:
-        restaurants_data = [filtered_df[filtered_df['nom_resto'] == name].iloc[0] for name in restaurant_choices]
-        user_location = get_user_location()
-        display_comparison(restaurants_data, user_location, df)
-        # Appel du graphique
-        fig = plot_comparison_chart(restaurants_data)
-        st.plotly_chart(fig)
-    else:
-        st.info("Veuillez sélectionner exactement deux restaurants à comparer.")
+    # Onglet Comparer deux restaurants
+    with tabs[1]:
+        st.title("Comparer deux restaurants")
 
+if __name__ == "__main__":
+    comparaison_deux_resto()

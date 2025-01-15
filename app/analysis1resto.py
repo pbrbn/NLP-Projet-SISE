@@ -15,6 +15,9 @@ import random
 import folium
 from streamlit_folium import st_folium
 from geopy.distance import geodesic
+from utils import conexion_db
+from mistralai import Mistral
+from dotenv import load_dotenv
 
 # Charger le modèle de langue française de spaCy
 nlp = spacy.load('fr_core_news_md')
@@ -22,22 +25,33 @@ nlp = spacy.load('fr_core_news_md')
 # Définition du chemin du répertoire courant
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '..', 'src')))
 
-from processing.data_handler import DataHandler
-from processing.text_preprocessor import TextPreprocessor
-from processing.restaurant_classifier import RestaurantClassifier
-from processing.review_clusterer import ReviewClusterer
+from processing.data_preprocessor import DataPreprocessor
 from processing.sentiment_analyzer import SentimentAnalyzer
-from processing.visualizer import Visualizer
 from processing.keyword_extractor import KeywordExtractor
+from processing.resume_avis import ResumerAvis
 
-data_path = "../data/DataClean/restaurants_data.csv"
+# Charger les variables d'environnement
+load_dotenv()
+
+# Chemin vers la DB
+# db_path = os.path.abspath(os.path.join(os.getcwd(), '..', 'data', 'database.db'))
+# df = conexion_db(db_path)
+
+
+
+# charger les données
 
 def load_data():
-    """Charge les données depuis le CSV et convertit la note en float."""
-    df = pd.read_csv(data_path)
+    #charger les données
+    df = pd.read_csv("data_100.csv")
     return df
 
+
 df = load_data()
+
+# Initialiser la classe ResumerAvis
+MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
+resumer_avis = ResumerAvis(api_key=MISTRAL_API_KEY)
 
 def extract_price_range(price_string):
     """Extrait les valeurs min et max d'une fourchette de prix"""
@@ -52,11 +66,11 @@ def filter_by_price_range(df, selected_range):
     """Filtre les restaurants selon la fourchette de prix sélectionnée"""
     if selected_range == "Toutes les fourchettes":
         return df
-    
+
     selected_min, selected_max = extract_price_range(selected_range)
     if selected_min is None or selected_max is None:
         return df
-    
+
     return df[
         ((df['prix_min'] >= selected_min) & (df['prix_min'] <= selected_max)) |
         ((df['prix_max'] >= selected_min) & (df['prix_max'] <= selected_max)) |
@@ -143,7 +157,6 @@ def display_restaurant_information(restaurant_data, user_location):
 
     st_folium(map_, width=700, height=500)
 
-
 def filter_reviews(df, selected_restaurant):
     """Filtre les avis pour le restaurant sélectionné."""
     return df[df['nom_resto'] == selected_restaurant]
@@ -188,18 +201,18 @@ def generate_wordcloud(reviews):
                 colormap='viridis',
                 max_words=200
             ).generate(all_text)
-            
+
             # Récupérer les mots et leurs fréquences
             word_list = list(wordcloud.words_.keys())
             freq_list = list(wordcloud.words_.values())
-            
+
             # Définir les couleurs pour les mots
             colors = [f"rgba({random.randint(0, 255)}, {random.randint(0, 255)}, {random.randint(0, 255)}, 0.7)" for _ in range(len(word_list))]
-            
+
             # Créer une disposition aléatoire des mots
             x_coords = np.random.uniform(low=-1, high=1, size=len(word_list))
             y_coords = np.random.uniform(low=-1, high=1, size=len(word_list))
-            
+
             # Créer la figure Plotly
             fig = go.Figure(data=[go.Scatter(
                 x=x_coords,
@@ -212,7 +225,7 @@ def generate_wordcloud(reviews):
                     color=colors
                 )
             )])
-            
+
             # Personnaliser l'apparence de la figure
             fig.update_layout(
                 xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
@@ -220,7 +233,7 @@ def generate_wordcloud(reviews):
                 margin=dict(l=0, r=0, t=0, b=0),
                 hovermode='closest'
             )
-            
+
             # Afficher la figure dans Streamlit
             st.plotly_chart(fig)
         else:
@@ -241,24 +254,100 @@ def analyze_restaurant(df, selected_restaurant):
     else:
         st.warning("Aucun avis disponible pour ce restaurant.")
 
-def page_analyse_restaurant():
-    st.sidebar.title("Restaurant Review Analysis")
-    st.sidebar.write("Welcome to the Restaurant Review Analysis app!")
-    st.sidebar.write("Select a restaurant from the dropdown menu to view detailed information and sentiment analysis.")
+def analyse_restaurant():
     
-    filtered_df = filter_restaurants(df)
-    
-    if filtered_df.empty:
-        st.warning("Aucun restaurant ne correspond à vos critères de sélection.")
-        return
-    
-    selected_restaurant = st.sidebar.selectbox("Choose a restaurant:", filtered_df["nom_resto"].unique())
-    
-    restaurant_data = filtered_df[filtered_df['nom_resto'] == selected_restaurant].iloc[0]
-    user_location = get_user_location()
-    display_restaurant_information(restaurant_data, user_location)
-    analyze_restaurant(df, selected_restaurant)
+    # Création des onglets
+    tab1, tab2= st.tabs(["Analyse restauant","Analyse IA"])
+
+    # Onglet 1: Analyse statistique existante
+    with tab1:
+        st.sidebar.title("Restaurant Review Analysis")
+        st.sidebar.write("Welcome to the Restaurant Review Analysis app!")
+
+        filtered_df = filter_restaurants(df)
+
+        if filtered_df.empty:
+            st.warning("Aucun restaurant ne correspond à vos critères de sélection.")
+            return
+
+        selected_restaurant = st.sidebar.selectbox("Choose a restaurant:", filtered_df["nom_resto"].unique())
+
+        restaurant_data = filtered_df[filtered_df['nom_resto'] == selected_restaurant].iloc[0]
+        user_location = get_user_location()
+        display_restaurant_information(restaurant_data, user_location)
+
+        restaurant_reviews = filter_reviews(df, selected_restaurant)
+        if not restaurant_reviews.empty:
+            avg_polarity, avg_subjectivity, polarities = analyze_sentiments(
+                restaurant_reviews['commentaire'].tolist()
+            )
+            display_sentiment_analysis(avg_polarity, avg_subjectivity)
+            plot_sentiment_distribution(polarities)
+        else:
+            st.warning("Aucun avis disponible pour ce restaurant.")
+
+        if not restaurant_reviews.empty:
+            generate_wordcloud(restaurant_reviews['commentaire'].tolist())
+        else:
+            st.warning("Aucun avis disponible pour générer un nuage de mots.")
+
+    # Onglet 3: Analyse IA avec Mistral
+    with tab2:
+        st.subheader("Analyse approfondie avec IA")
+        
+        # Mode d'analyse
+        analysis_mode = st.radio(
+            "Choisissez le mode d'analyse",
+            ["Résumé global", "Question spécifique"]
+        )
+
+        avis_restaurant = df[df['nom_resto'] == selected_restaurant]['commentaire'].tolist()
+        
+        if not avis_restaurant:
+            st.warning("Aucun avis disponible pour l'analyse.")
+            return
+
+        if analysis_mode == "Résumé global":
+            if st.button("Générer le résumé"):
+                with st.spinner("Analyse en cours..."):
+                    try:
+                        resume = resumer_avis.generer_resume(
+                            avis_restaurant_1=avis_restaurant,
+                            type_query="analyze_1"
+                        )
+                        
+                        # Affichage structuré du résumé
+                        st.success("Analyse terminée !")
+                        
+                        # Création de colonnes pour une meilleure organisation
+                        col1, col2 = st.columns(2)
+                        
+                        with st.expander("Voir l'analyse complète", expanded=True):
+                            st.markdown(resume)
+                            
+                    except Exception as e:
+                        st.error(f"Erreur lors de l'analyse : {str(e)}")
+
+        else:  # Question spécifique
+            question = st.text_input(
+                "Posez votre question sur les avis :",
+                placeholder="Exemple: Que pensent les clients du service ?"
+            )
+            
+            if question and st.button("Obtenir une réponse"):
+                with st.spinner("Analyse en cours..."):
+                    try:
+                        prompt = f"En te basant sur les avis suivants, réponds à cette question: {question}"
+                        response = resumer_avis.generer_resume(
+                            avis_restaurant_1=avis_restaurant,
+                            type_query="analyze_1"
+                        )
+                        
+                        st.success("Réponse générée !")
+                        st.write(response)
+                        
+                    except Exception as e:
+                        st.error(f"Erreur lors de l'analyse : {str(e)}")
 
 if __name__ == '__main__':
-   page_analyse_restaurant()
-
+    analyse_restaurant()
