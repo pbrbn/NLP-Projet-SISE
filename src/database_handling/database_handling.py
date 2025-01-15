@@ -1,5 +1,7 @@
 import sqlite3
 import os
+import pandas as pd
+import numpy as np
 import re
 from geopy.geocoders import Nominatim
 
@@ -302,3 +304,52 @@ class DBHandling:
             return int(match.group(0))
         return None
     
+    def combine_tables(self, avis: pd.DataFrame, infos_resto: pd.DataFrame, arrondissement: pd.DataFrame) -> pd.DataFrame:
+        """
+        Combine les tables avis, infos_resto et arrondissement en effectuant des jointures successives.
+
+        Args:
+            avis (pd.DataFrame): Table contenant les avis.
+            infos_resto (pd.DataFrame): Table contenant les informations des restaurants.
+            arrondissement (pd.DataFrame): Table contenant les informations des arrondissements.
+
+        Returns:
+            pd.DataFrame: Table finale combinée avec les informations des avis,
+                        des restaurants et des arrondissements.
+
+        Exemple:
+            db = DBHandling()
+            avis_df = pd.DataFrame(...)
+            resto_df = pd.DataFrame(...)
+            arrond_df = pd.DataFrame(...)
+            combined_df = db.combine_tables(avis_df, resto_df, arrond_df)
+        """
+        # Jointure entre avis et infos_resto
+        combined = pd.merge(
+            avis,
+            infos_resto,
+            left_on='id_restaurant',
+            right_on='id',
+            how='left',
+            suffixes=('_avis', '_resto')
+        )
+
+        # Jointure avec arrondissement
+        final_table = pd.merge(
+            combined,
+            arrondissement,
+            on='arrondissement',
+            how='inner'
+        )
+
+        # Supprimer la colonne id_restaurant pour éviter les doublons
+        final_table = final_table.drop(columns=['id_restaurant'])
+
+        # Renommer les colonnes pour plus de clarté
+        final_table = final_table.rename(columns={
+            'note': 'note_avis',
+            'note_moyenne': 'note_moyenne_resto',
+            'nom': 'nom_resto',
+        })
+
+        return final_table
