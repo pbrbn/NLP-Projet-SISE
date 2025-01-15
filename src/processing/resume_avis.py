@@ -1,6 +1,7 @@
 from mistralai import Mistral
 import os
 from dotenv import load_dotenv
+import logging
 
 load_dotenv()
 
@@ -11,7 +12,7 @@ class ResumerAvis:
     Classe pour générer un résumé à partir d'une liste d'avis en utilisant l'API Mistral.
     """
 
-    def __init__(self, api_key = MISTRAL_API_KEY, model: str = "open-mistral-nemo-2407", max_length: int = 3500, type_query: str = "analyze_1"):
+    def __init__(self, api_key=MISTRAL_API_KEY, model: str = "open-mistral-nemo-2407", max_length: int = 3500, type_query: str = "analyze_1"):
         """
         Initialise l'instance de la classe avec les paramètres nécessaires.
 
@@ -19,13 +20,14 @@ class ResumerAvis:
             api_key (str): La clé API Mistral.
             model (str): Le modèle à utiliser pour la génération (par défaut: open-mistral-nemo-2407).
             max_length (int): Longueur maximale des avis combinés pour éviter de dépasser la limite de tokens.
-            type_query (str): Le type de requête ('analyze_1' ou 'analyze_2'), ce paramètre permet soit d'analyser les commentaires d'un restaurant, soit de comparer 2 restaurants. 
+            type_query (str): Le type de requête ('analyze_1' ou 'analyze_2'), ce paramètre permet soit d'analyser les commentaires d'un restaurant, soit de comparer 2 restaurants.
         """
         self.api_key = api_key
         self.model = model
         self.max_length = max_length
         self.type_query = type_query
         self.client = Mistral(api_key=self.api_key)
+        logging.basicConfig(level=logging.INFO)
 
     def _prepare_prompt(self, avis_restaurant_1: list[str], avis_restaurant_2: list[str] = None) -> str:
         """
@@ -38,8 +40,14 @@ class ResumerAvis:
         Retourne:
             str: Prompt formaté prêt à être envoyé au modèle.
         """
-        #Analyse des commentaires d'un restaurant 
-        if self.type_query == "analyze_1" :
+        if not isinstance(avis_restaurant_1, list) or not all(isinstance(avis, str) for avis in avis_restaurant_1):
+            raise ValueError("avis_restaurant_1 doit être une liste de chaînes de caractères.")
+
+        if avis_restaurant_2 and (not isinstance(avis_restaurant_2, list) or not all(isinstance(avis, str) for avis in avis_restaurant_2)):
+            raise ValueError("avis_restaurant_2 doit être une liste de chaînes de caractères.")
+
+        # Analyse des commentaires d'un restaurant
+        if self.type_query == "analyze_1":
             combined_avis = "\n".join(avis_restaurant_1)
 
             # Troncature si nécessaire
@@ -61,9 +69,9 @@ class ResumerAvis:
                 "Résumé :"
             )
             return prompt
-        
-        #Analyse de 2 restaurants 
-        elif self.type_query == "analyze_2" :
+
+        # Analyse de 2 restaurants
+        elif self.type_query == "analyze_2":
             if not avis_restaurant_2 or len(avis_restaurant_2) == 0:
                 raise ValueError("Pour la comparaison de deux restaurants, veuillez fournir les avis du second restaurant.")
 
@@ -123,5 +131,12 @@ class ResumerAvis:
                 ]
             )
             return chat_response.choices[0].message.content
+        except ValueError as ve:
+            logging.error(f"ValueError: {ve}")
+            return f"Une erreur de valeur s'est produite : {str(ve)}"
+        except ConnectionError as ce:
+            logging.error(f"ConnectionError: {ce}")
+            return f"Une erreur de connexion s'est produite : {str(ce)}"
         except Exception as e:
+            logging.error(f"Exception: {e}")
             return f"Une erreur s'est produite lors de la génération du résumé : {str(e)}"
