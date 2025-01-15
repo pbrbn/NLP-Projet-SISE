@@ -19,7 +19,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 's
 from database_handling import DBHandling
 
 
-from 2analysis import page2_analysis
+from analysis2resto import comparaison_deux_resto
 
 #################### Données factices pour test de l'interface ##################
 
@@ -225,9 +225,7 @@ elif page == page2_analysis:
 # Page to compare 2 restaurants ----------------------------------------------------------
 
 elif page == page3_comparison:
-    st.title("Comparison")
-    st.write("Compare restaurants on a map.")
-    page2_analysis()
+    comparaison_deux_resto()
 
 
 ####################################################################################
