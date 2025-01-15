@@ -176,13 +176,24 @@ class RestaurantScraper:
         else :
             note_resto = "NA"
 
+        # Test Catégorie prix
+        categorie_prix = soup.find_all('div', {'class': 'CsAqy u Ci Ph w'})
+        # print(categorie_prix) # renvoie tout les spans, on va faire du regex pour récupérer la bonne catégorie
+        categorie_prix_regex = re.search(r'€[€-]*€', str(categorie_prix))
+        categorie_prix_regex = categorie_prix_regex.group() if categorie_prix_regex else "NA"
+
+        # print(categorie_prix_regex)
+
+
+
         #Créer un DataFrame des résultats
         results = {
             "Nom": nom_resto,
             "Type_Cuisine": type_c,
             "Fourchette_prix": fourchette_resto,
             "Adresse": adresse_resto,
-            "Note_moyenne": [note_resto]
+            "Note_moyenne": [note_resto],
+            "Categorie_prix": categorie_prix_regex
         }
         return pd.DataFrame(results)
 

@@ -142,6 +142,24 @@ if page == page1_add_restaurant:
             #st.write(description_new)
             st.dataframe(df_info_avis_new.head(5))
 
+    # Temp create plotly graph with stacked bar chart
+    # Jointure arrondissement et restaurant 
+    db.connect()
+    query = 'select * from restaurant'
+    info_resto = pd.read_sql_query(query,conn)
+    # info_resto contient tout les restaurants de la database
+    # info arrondissement contient les arrondissements de Lyon
+    query = 'select * from arrondissement'
+    info_arrondissement = pd.read_sql_query(query,conn)
+    # Jointure des deux tables sur arrondissement
+    final_table = pd.merge(info_resto, info_arrondissement, on='arrondissement', how='inner')
+
+    st.write(final_table.head())
+
+    # mappage fourchette de prix
+
+    db.close()
+
 
 # Page to analyze 1 restaurant ----------------------------------------------------------
 
