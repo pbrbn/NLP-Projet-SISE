@@ -1,8 +1,8 @@
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from sklearn.cluster import KMeans
-from processing import preprocess_reviews
-from sentiments_analyse import sentiments_analyse
-from mots_cles_liste_avis import aggreger_mots_cles
+from processing.data_preprocessor import DataPreprocessor
+from processing.sentiment_analyzer import SentimentAnalyzer
+from processing.keyword_extractor import KeywordExtractor
 import pandas as pd
 import spacy
 
@@ -28,7 +28,8 @@ def clustering_avis(avis : list[str], vector_size : int = 100, n_clusters : int 
     '''
     ##### PRE-PROCESSING AVIS #####
 
-    clean_avis = preprocess_reviews(avis)
+    process = DataPreprocessor()
+    clean_avis = process.preprocess_reviews(avis)
 
     #Tokenistion
     #Passage en liste de liste 
@@ -82,7 +83,8 @@ def clustering_avis(avis : list[str], vector_size : int = 100, n_clusters : int 
     #ANALYSE DES SENTIMENTS 
     analyse_sent = []
     for i in clean_liste_clusters : 
-        sentiments = sentiments_analyse(i, join = True)
+        sent = SentimentAnalyzer()
+        sentiments = sent.analyze_sentiments(i, join = True)
         analyse_sent.append(sentiments)
 
     #Conversion en liste plate 
@@ -91,7 +93,8 @@ def clustering_avis(avis : list[str], vector_size : int = 100, n_clusters : int 
     #MOTS-CLES 
     mots_cles = []
     for i in clean_liste_clusters : 
-        mots_cles_avis = aggreger_mots_cles(i, top_n=top_n)
+        mots = KeywordExtractor()
+        mots_cles_avis = mots.aggregate_keywords(i, top_n=top_n)
         mots_cles.append(mots_cles_avis)
 
     
