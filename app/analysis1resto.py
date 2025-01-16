@@ -29,6 +29,7 @@ from processing.data_preprocessor import DataPreprocessor
 from processing.sentiment_analyzer import SentimentAnalyzer
 from processing.keyword_extractor import KeywordExtractor
 from processing.resume_avis import ResumerAvis
+from processing.kmeans_avis import clustering_avis
 
 # Charger les variables d'environnement
 load_dotenv()
@@ -285,6 +286,28 @@ def analyse_restaurant():
     else:
         st.warning("Aucun avis disponible pour générer un nuage de mots.")
 
+    if not restaurant_reviews.empty:
+        clustering_interface()
+    else:
+        st.warning("Aucun avis disponible pour générer un nuage de mots.")
+
+def clustering_interface():
+    st.subheader("Clustering des Avis")
+    st.subheader("Analysez les avis en clusters.")
+
+    # Sélectionner le nombre de clusters
+    n_clusters = st.sidebar.number_input("Nombre de clusters", min_value=1, max_value=10, value=3)
+
+    # Bouton pour lancer le clustering
+    if st.button("Lancer le clustering"):
+        with st.spinner("Clustering en cours..."):
+            try:
+                avis = df['commentaire'].tolist()
+                clustering_result = clustering_avis(avis, n_clusters=n_clusters)
+                st.subheader("Résultats du clustering")
+                st.dataframe(clustering_result)
+            except Exception as e:
+                st.error(f"Erreur lors du clustering : {str(e)}")
 
 if __name__ == '__main__':
     analyse_restaurant()
