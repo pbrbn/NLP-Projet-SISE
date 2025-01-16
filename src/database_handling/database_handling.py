@@ -158,7 +158,7 @@ class DBHandling:
                 categorie_prix TEXT,
                 latitude REAL,
                 longitude REAL,
-                FOREIGN KEY (arrondissement) REFERENCES arrondissement(arrondissement);
+                FOREIGN KEY (arrondissement) REFERENCES arrondissement(arrondissement),
                 UNIQUE (nom, adresse) 
             )
             """)
