@@ -165,11 +165,11 @@ class DBHandling:
             self.execute_query("""
             CREATE TABLE IF NOT EXISTS avis (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                id_restaurant INTEGER,
+                nom_restaurant TEXT,
                 date DATE,
                 note REAL,
                 commentaire TEXT,
-                FOREIGN KEY (id_restaurant) REFERENCES restaurant(id)
+                FOREIGN KEY (nom_restaurant) REFERENCES restaurant(nom)
             )
             """)
             print("Tables créées avec succès.")
@@ -219,12 +219,12 @@ class DBHandling:
             print("Erreur lors de l'insertion.")
             print(f"An error occurred: {e}")
 
-    def insert_avis(self, id_restaurant: int, date: str, note: int, commentaire: str):
+    def insert_avis(self, nom_restaurant: str, date: str, note: int, commentaire: str):
         """
         Insère un avis dans la table 'avis'.
 
         Args:
-            id_restaurant (int): ID du restaurant.
+            nom_restaurant (str): Nom du restaurant.
             date (str): Date de l'avis.
             note (int): Note de l'avis.
             commentaire (str): Commentaire de l'avis.
@@ -236,7 +236,7 @@ class DBHandling:
             db.close()
         """
         try:
-            self.execute_query("INSERT INTO avis (id_restaurant, date, note, commentaire) VALUES (?, ?, ?, ?)", (id_restaurant, date, note, commentaire))
+            self.execute_query("INSERT INTO avis (nom_restaurant, date, note, commentaire) VALUES (?, ?, ?, ?)", (nom_restaurant, date, note, commentaire))
             print("Insertion réussie.")
         except sqlite3.Error as e:
             print("Erreur lors de l'insertion.")
@@ -330,8 +330,8 @@ class DBHandling:
         combined = pd.merge(
             avis,
             infos_resto,
-            left_on='id_restaurant',
-            right_on='id',
+            left_on='nom_restaurant',
+            right_on='nom',
             how='left',
             suffixes=('_avis', '_resto')
         )
@@ -344,8 +344,8 @@ class DBHandling:
             how='inner'
         )
 
-        # Supprimer la colonne id_restaurant pour éviter les doublons
-        final_table = final_table.drop(columns=['id_restaurant'])
+        # Supprimer la colonne nom_restaurant pour éviter les doublons
+        final_table = final_table.drop(columns=['nom_restaurant'])
 
         # Renommer les colonnes pour plus de clarté
         final_table = final_table.rename(columns={
