@@ -255,99 +255,36 @@ def analyze_restaurant(df, selected_restaurant):
         st.warning("Aucun avis disponible pour ce restaurant.")
 
 def analyse_restaurant():
-    
-    # Création des onglets
-    tab1, tab2= st.tabs(["Analyse restauant","Assistant IA"])
+    st.sidebar.title("Restaurant Review Analysis")
+    st.sidebar.write("Welcome to the Restaurant Review Analysis app!")
 
-    # Onglet 1: Analyse statistique existante
-    with tab1:
-        st.sidebar.title("Restaurant Review Analysis")
-        st.sidebar.write("Welcome to the Restaurant Review Analysis app!")
+    filtered_df = filter_restaurants(df)
 
-        filtered_df = filter_restaurants(df)
+    if filtered_df.empty:
+        st.warning("Aucun restaurant ne correspond à vos critères de sélection.")
+        return
 
-        if filtered_df.empty:
-            st.warning("Aucun restaurant ne correspond à vos critères de sélection.")
-            return
+    selected_restaurant = st.sidebar.selectbox("Choose a restaurant:", filtered_df["nom_resto"].unique())
 
-        selected_restaurant = st.sidebar.selectbox("Choose a restaurant:", filtered_df["nom_resto"].unique())
+    restaurant_data = filtered_df[filtered_df['nom_resto'] == selected_restaurant].iloc[0]
+    user_location = get_user_location()
+    display_restaurant_information(restaurant_data, user_location)
 
-        restaurant_data = filtered_df[filtered_df['nom_resto'] == selected_restaurant].iloc[0]
-        user_location = get_user_location()
-        display_restaurant_information(restaurant_data, user_location)
-
-        restaurant_reviews = filter_reviews(df, selected_restaurant)
-        if not restaurant_reviews.empty:
-            avg_polarity, avg_subjectivity, polarities = analyze_sentiments(
-                restaurant_reviews['commentaire'].tolist()
-            )
-            display_sentiment_analysis(avg_polarity, avg_subjectivity)
-            plot_sentiment_distribution(polarities)
-        else:
-            st.warning("Aucun avis disponible pour ce restaurant.")
-
-        if not restaurant_reviews.empty:
-            generate_wordcloud(restaurant_reviews['commentaire'].tolist())
-        else:
-            st.warning("Aucun avis disponible pour générer un nuage de mots.")
-
-    # Onglet 3: Analyse IA avec Mistral
-    with tab2:
-        st.subheader("Analyse approfondie avec IA")
-        
-        # Mode d'analyse
-        analysis_mode = st.radio(
-            "Choisissez le mode d'analyse",
-            ["Résumé global", "Question spécifique"]
+    restaurant_reviews = filter_reviews(df, selected_restaurant)
+    if not restaurant_reviews.empty:
+        avg_polarity, avg_subjectivity, polarities = analyze_sentiments(
+            restaurant_reviews['commentaire'].tolist()
         )
+        display_sentiment_analysis(avg_polarity, avg_subjectivity)
+        plot_sentiment_distribution(polarities)
+    else:
+        st.warning("Aucun avis disponible pour ce restaurant.")
 
-        avis_restaurant = df[df['nom_resto'] == selected_restaurant]['commentaire'].tolist()
-        
-        if not avis_restaurant:
-            st.warning("Aucun avis disponible pour l'analyse.")
-            return
+    if not restaurant_reviews.empty:
+        generate_wordcloud(restaurant_reviews['commentaire'].tolist())
+    else:
+        st.warning("Aucun avis disponible pour générer un nuage de mots.")
 
-        if analysis_mode == "Résumé global":
-            if st.button("Générer le résumé"):
-                with st.spinner("Analyse en cours..."):
-                    try:
-                        resume = resumer_avis.generer_resume(
-                            avis_restaurant_1=avis_restaurant,
-                            type_query="analyze_1"
-                        )
-                        
-                        # Affichage structuré du résumé
-                        st.success("Analyse terminée !")
-                        
-                        # Création de colonnes pour une meilleure organisation
-                        col1, col2 = st.columns(2)
-                        
-                        with st.expander("Voir l'analyse complète", expanded=True):
-                            st.markdown(resume)
-                            
-                    except Exception as e:
-                        st.error(f"Erreur lors de l'analyse : {str(e)}")
-
-        else:  # Question spécifique
-            question = st.text_input(
-                "Posez votre question sur les avis :",
-                placeholder="Exemple: Que pensent les clients du service ?"
-            )
-            
-            if question and st.button("Obtenir une réponse"):
-                with st.spinner("Analyse en cours..."):
-                    try:
-                        prompt = f"En te basant sur les avis suivants, réponds à cette question: {question}"
-                        response = resumer_avis.generer_resume(
-                            avis_restaurant_1=avis_restaurant,
-                            type_query="analyze_1"
-                        )
-                        
-                        st.success("Réponse générée !")
-                        st.write(response)
-                        
-                    except Exception as e:
-                        st.error(f"Erreur lors de l'analyse : {str(e)}")
 
 if __name__ == '__main__':
     analyse_restaurant()

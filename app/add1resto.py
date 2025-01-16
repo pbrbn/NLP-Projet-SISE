@@ -41,7 +41,6 @@ def ajouter_restaurant():
             nom_new = df_info_resto_new.iloc[0, 0]
             type_cuisine_new = df_info_resto_new.iloc[0, 1]
             adress_new = df_info_resto_new.iloc[0, 3]
-            categorie_prix_new = df_info_resto_new.iloc[0, 5]
 
             # Affichage des informations avant ajout à la base de données
             st.success("Restaurant found")
@@ -63,7 +62,6 @@ def ajouter_restaurant():
             fourchette_prix_new = df_info_resto_new.iloc[0, 2]
             adress_new = df_info_resto_new.iloc[0, 3]
             note_moy_new = df_info_resto_new.iloc[0, 4]
-            categorie_prix_new = df_info_resto_new.iloc[0, 5]
 
             # Connexion à la base de données et insertion des données
             db.connect()
@@ -73,8 +71,7 @@ def ajouter_restaurant():
                 fourchette_prix=fourchette_prix_new,
                 adresse=adress_new,
                 note_moyenne=note_moy_new,
-                description="Description non renseignée",
-                categorie_prix=categorie_prix_new
+                description="Description non renseignée"
             )
             # db.insert_avis()  # Ajout des avis si nécessaire
             db.close()

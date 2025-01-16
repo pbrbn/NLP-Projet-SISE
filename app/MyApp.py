@@ -13,6 +13,7 @@ from analysis2resto import comparaison_deux_resto
 from analysis1resto import analyse_restaurant
 from acceuil import acceuil
 from add1resto import ajouter_restaurant
+from resume12avis import resume_les_avis
 
 from streamlit_option_menu import option_menu
 import streamlit as st
@@ -27,7 +28,7 @@ st.title("🍴 streaApplication de Gestion de Restaurants")
 with st.sidebar:
     page = option_menu(
         menu_title="Navigation",  # Titre du menu
-        options=["Acceuil","Ajouter un restaurant","Analyser un restaurant", "Comparer deux restaurants"],  # Options du menu
+        options=["Acceuil","Ajouter un restaurant","Analyser un restaurant", "Comparer deux restaurants", "Resumé avec L'IA"],  # Options du menu
         icons=["house", "search", "bar-chart-line"],  # Icônes pour chaque option
         menu_icon="list",  # Icône du menu principal
         default_index=0,  # Option sélectionnée par défaut
@@ -42,3 +43,6 @@ elif page == "Analyser un restaurant":
     analyse_restaurant()
 elif page == "Comparer deux restaurants":
     comparaison_deux_resto()
+elif page == "Resumé avec L'IA":
+    resume_les_avis()
+
