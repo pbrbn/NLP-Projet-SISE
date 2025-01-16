@@ -34,8 +34,9 @@ class RestaurantScraper:
     def scrape_infos_avis(self, max_pages=None):
         """
         Scrape les informations des avis sur plusieurs pages.
-        Retourne un DataFrame avec les dates, notes et commentaires.
+        Retourne un DataFrame avec le nom du restaurant, les dates, notes et commentaires.
         """
+        nom_restaurant = [nom.text for nom in soup.find_all('h1', {'class': 'biGQs _P egaXP rRtyp'})]
         clean_dates, clean_notes, clean_texte = [], [], []
         url_next_page = self.base_url
         page_count = 0
@@ -95,6 +96,7 @@ class RestaurantScraper:
 
         # Créer un DataFrame des résultats
         results = {
+            "nom_restaurant": nom_restaurant,
             "Date": clean_dates,
             "Notes": clean_notes,
             "Commentaires": clean_texte
