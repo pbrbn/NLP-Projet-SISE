@@ -19,23 +19,25 @@ from streamlit_option_menu import option_menu
 import streamlit as st
 
 # Configuration de la page Streamlit
-st.set_page_config(page_title="Application de Gestion de Restaurants", page_icon="🍴")
+st.set_page_config(page_title="Application de Gestion de Restaurants", page_icon="🍴", layout="wide")
 
 # Titre principal
-st.title("🍴 streaApplication de Gestion de Restaurants")
+st.title("🍴 Application de Gestion de Restaurants")
 
-# Menu de navigation avec option_menu
+st.subheader("Bienvenue ! Utilisez le menu pour naviguer.")
+
+# Menu de navigation
 with st.sidebar:
     page = option_menu(
-        menu_title="Navigation",  # Titre du menu
-        options=["Acceuil","Ajouter un restaurant","Analyser un restaurant", "Comparer deux restaurants", "Resumé avec L'IA"],  # Options du menu
-        icons=["house", "search", "bar-chart-line"],  # Icônes pour chaque option
-        menu_icon="list",  # Icône du menu principal
-        default_index=0,  # Option sélectionnée par défaut
+        menu_title="Navigation",
+        options=["Accueil", "Ajouter un restaurant", "Analyser un restaurant", "Comparer deux restaurants", "Résumé IA"],
+        icons=["house", "plus", "search", "arrows-angle-expand", "robot"],
+        menu_icon="list",
+        default_index=0,
     )
 
 # Chargement des pages
-if page == "Acceuil":
+if page == "Accueil":
     acceuil()
 elif page == "Ajouter un restaurant":
     ajouter_restaurant()
@@ -43,6 +45,6 @@ elif page == "Analyser un restaurant":
     analyse_restaurant()
 elif page == "Comparer deux restaurants":
     comparaison_deux_resto()
-elif page == "Resumé avec L'IA":
+elif page == "Résumé IA":
     resume_les_avis()
 
