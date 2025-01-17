@@ -14,6 +14,7 @@ from analysis1resto import analyse_restaurant
 from acceuil import acceuil
 from add1resto import ajouter_restaurant
 from resume12avis import resume_les_avis
+from etude_insee import etude_insee
 
 from streamlit_option_menu import option_menu
 import streamlit as st
@@ -22,7 +23,7 @@ import streamlit as st
 with st.sidebar:
     page = option_menu(
         menu_title="Navigation",
-        options=["Accueil", "Ajouter un restaurant", "Analyser un restaurant", "Comparer deux restaurants", "Résumé IA"],
+        options=["Accueil", "Ajouter un restaurant", "Analyser un restaurant", "Comparer deux restaurants", "Résumé IA", "Croisement données de l'INSEE"],
         icons=["house", "plus", "search", "arrows-angle-expand", "robot"],
         menu_icon="list",
         default_index=0,
@@ -39,4 +40,6 @@ elif page == "Comparer deux restaurants":
     comparaison_deux_resto()
 elif page == "Résumé IA":
     resume_les_avis()
-
+elif page == "Croisement données de l'INSEE":
+    etude_insee()
+    

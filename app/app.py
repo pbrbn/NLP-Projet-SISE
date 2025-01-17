@@ -174,8 +174,8 @@ if page == page1_add_restaurant:
         '€€€€': '€€€€ : Restaurant gourmet'
     })
 
-    # Filtrer les données pour ne conserver que les arrondissements 69002 et 69008
-    filtered_table = final_table[final_table['arrondissement'].isin(['69002', '69008'])]
+    # Filtrer les données pour ne conserver que les arrondissements 69006 et 69008
+    filtered_table = final_table[final_table['arrondissement'].isin(['69006', '69008'])]
 
     # Calculer les proportions
     proportion_table = filtered_table.groupby(['arrondissement', 'categorie_prix']).size().reset_index(name='count')
