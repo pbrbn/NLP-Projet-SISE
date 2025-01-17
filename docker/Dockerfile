@@ -5,12 +5,12 @@ FROM python:3.11-slim
 WORKDIR /app
 
 #Fichiers nécessaires 
-COPY ../data /app/data
-COPY ../src /app/src
-COPY ../app /app/app
+COPY ../../data /app/data
+COPY ../../src /app/src
+COPY ../../app /app/app
 
 #requirements
-COPY ../requirements.txt .
+COPY ../../requirements.txt .
 
 #Installation des dépendances 
 RUN pip install -r requirements.txt
