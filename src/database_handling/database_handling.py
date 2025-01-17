@@ -237,7 +237,7 @@ class DBHandling:
         """
         try:
             self.execute_query("INSERT INTO avis (nom_restaurant, date, note, commentaire) VALUES (?, ?, ?, ?)", (nom_restaurant, date, note, commentaire))
-            print("Insertion réussie.")
+            # print("Insertion réussie.")
         except sqlite3.Error as e:
             print("Erreur lors de l'insertion.")
             print(f"An error occurred: {e}")

@@ -40,7 +40,11 @@ class RestaurantScraper:
         html_content = self._fetch_html(self.base_url)
         soup = BeautifulSoup(html_content, "html.parser")
         nom_resto = [nom.text for nom in soup.find_all('h1', {'class': 'biGQs _P egaXP rRtyp'})]
-        nom_resto = str(nom_resto[0])
+        # Pas toujours une liste
+        if len(nom_resto) > 1:
+            nom_resto = str(nom_resto[0])
+        else:
+            nom_resto = str(nom_resto)
         # print(nom_resto)
         clean_nom, clean_dates, clean_notes, clean_texte = [], [], [], []
         url_next_page = self.base_url
