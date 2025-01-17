@@ -79,7 +79,7 @@ def filter_restaurants(df):
 
     # Diviser les cuisines et obtenir une liste unique triée
     cuisines = df['type_cuisine'].str.split(', ').explode()
-    types_uniques = sorted(cuisine for cuisine in cuisines.unique() if cuisine)
+    types_uniques = ["Toutes les cuisines"] + sorted(cuisine for cuisine in cuisines.unique() if cuisine)
 
     # Gérer les fourchettes de prix
     fourchettes_prix = ["Toutes les fourchettes"]
@@ -87,16 +87,21 @@ def filter_restaurants(df):
     fourchettes_prix.extend([f for f in valid_fourchettes if f != ""])
 
     # Widgets Streamlit pour les sélections
-    selected_cuisine = st.sidebar.selectbox("Type de cuisine", types_uniques, index=0 if types_uniques else -1)
+    selected_cuisine = st.sidebar.selectbox("Type de cuisine", types_uniques, index=0)
     selected_prix = st.sidebar.selectbox("Fourchette de prix", fourchettes_prix)
     note_min = st.sidebar.number_input("Note minimum", min_value=0.0, max_value=5.0, value=0.0)
 
     # Filtrage du DataFrame
-    filtered_df = df[df['type_cuisine'].str.contains(selected_cuisine, na=False)]
+    if selected_cuisine != "Toutes les cuisines":
+        filtered_df = df[df['type_cuisine'].str.contains(selected_cuisine, na=False)]
+    else:
+        filtered_df = df.copy()
+
     filtered_df = filter_by_price_range(filtered_df, selected_prix)
     filtered_df = filtered_df[filtered_df['note_moyenne_resto'].astype(float) >= note_min]
 
     return filtered_df
+
 
 
 def get_user_location():
