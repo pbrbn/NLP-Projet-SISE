@@ -34,9 +34,19 @@ class RestaurantScraper:
     def scrape_infos_avis(self, max_pages=None):
         """
         Scrape les informations des avis sur plusieurs pages.
-        Retourne un DataFrame avec les dates, notes et commentaires.
+        Retourne un DataFrame avec le nom du restaurant, les dates, notes et commentaires.
         """
-        clean_dates, clean_notes, clean_texte = [], [], []
+
+        html_content = self._fetch_html(self.base_url)
+        soup = BeautifulSoup(html_content, "html.parser")
+        nom_resto = [nom.text for nom in soup.find_all('h1', {'class': 'biGQs _P egaXP rRtyp'})]
+        # Pas toujours une liste
+        if len(nom_resto) > 1:
+            nom_resto = str(nom_resto[0])
+        else:
+            nom_resto = str(nom_resto)
+        # print(nom_resto)
+        clean_nom, clean_dates, clean_notes, clean_texte = [], [], [], []
         url_next_page = self.base_url
         page_count = 0
 
@@ -79,6 +89,9 @@ class RestaurantScraper:
                     texte = "NA"
                 clean_texte.append(texte)
 
+                # Ajouter le nom du restaurant
+                clean_nom.append(nom_resto)
+
             # Trouver le lien de la page suivante
             next_page = soup.find('a', {'aria-label': 'Page suivante'})
             if next_page :
@@ -95,6 +108,7 @@ class RestaurantScraper:
 
         # Créer un DataFrame des résultats
         results = {
+            "nom_restaurant": clean_nom, 
             "Date": clean_dates,
             "Notes": clean_notes,
             "Commentaires": clean_texte
@@ -247,6 +261,12 @@ class RestaurantScraper:
             description.append("NA")
 
         #Stocke les résultats dans un dataframe
+        # Vérifier que toutes les listes ont la même longueur
+        min_length = min(len(nom_resto), len(description))
+
+        # Ajuster les listes pour qu'elles aient toutes la même longueur
+        nom_resto = nom_resto[:min_length]
+        description = description[:min_length]
         results = {
             "Nom" : nom_resto,
             "Description" : description
