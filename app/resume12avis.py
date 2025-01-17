@@ -15,7 +15,7 @@ def resume_les_avis():
     MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
 
     # Charger le fichier de données
-    file_path = "data_100.csv"
+    file_path = "data/data_100.csv"
     data = pd.read_csv(file_path)
 
     # Titre de l'application

@@ -4,7 +4,7 @@ import numpy as np
 
 # import le fichier data
 def load_data():
-    data = pd.read_csv("data.csv")
+    data = pd.read_csv("data/data.csv")
     return data
 
 df = load_data()

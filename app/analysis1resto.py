@@ -44,7 +44,7 @@ load_dotenv()
 
 def load_data():
     #charger les données
-    df = pd.read_csv("data_100.csv")
+    df = pd.read_csv("data/data_100.csv")
     return df
 
 
