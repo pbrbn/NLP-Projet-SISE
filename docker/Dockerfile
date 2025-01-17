@@ -1,5 +1,5 @@
 #Python 
-FROM python:3.11-slim
+FROM python:3.11.11-slim
 
 #Répertoire de travail 
 WORKDIR /app
@@ -8,13 +8,13 @@ WORKDIR /app
 COPY ../app /app/app
 COPY ../data /app/data
 COPY ../src /app/src
-COPY ../requirements.txt .
+COPY ../requirements_v2.txt .
 
 #Maj de pip 
 RUN pip install --upgrade pip
 
 #Installation des dépendances 
-RUN pip install -r requirements.txt
+RUN pip install -r requirements_v2.txt
 
 #Port
 EXPOSE 8501
