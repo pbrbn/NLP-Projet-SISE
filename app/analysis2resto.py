@@ -20,37 +20,42 @@ nlp = spacy.load('fr_core_news_md')
 
 # Définition du chemin du répertoire courant
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '..', 'src')))
-
 from processing.sentiment_analyzer import SentimentAnalyzer
 from processing.keyword_extractor import KeywordExtractor
 from processing.resume_avis import ResumerAvis
 
+@st.cache_data
+def get_data_from_db(db_path):
+    """Charge les données depuis la base de données et les met en cache."""
+    return conexion_db(db_path)
 
 # Chemin vers la DB
-# db_path = os.path.abspath(os.path.join(os.getcwd(), '..', 'data', 'database.db'))
-# df = conexion_db(db_path)
+db_path = os.path.abspath(os.path.join(os.getcwd(), '..', 'data', 'database.db'))
+df = get_data_from_db(db_path)
 
 
 
 # charger les données
 
-def load_data():
+#def load_data():
     #charger les données
-    df = pd.read_csv("data_100.csv")
-    return df
+#   df = pd.read_csv("data_100.csv")
+#   return df
 
 
-df = load_data()
+# df = load_data()
 
 
 # Extraction des prix
 def extract_price_range(price_string):
+    """Extrait les valeurs min et max d'une fourchette de prix"""
     numbers = re.findall(r'(\d+(?:,\d+)?)', price_string)
     if len(numbers) >= 2:
         min_price = float(numbers[0].replace(',', '.'))
         max_price = float(numbers[1].replace(',', '.'))
         return min_price, max_price
     return None, None
+
 
 # Filtrer les restaurants
 def filter_by_price_range(df, selected_range):
@@ -68,23 +73,30 @@ def filter_by_price_range(df, selected_range):
     ]
 
 def filter_restaurants(df):
-    cuisines = df['type_cuisine'].str.split(', ').explode()
-    types_uniques = sorted(cuisines.unique())
+    # Remplacer les valeurs manquantes par une chaîne vide avant de traiter les types de cuisine
+    df['type_cuisine'] = df['type_cuisine'].fillna('')
 
+    # Diviser les cuisines et obtenir une liste unique triée
+    cuisines = df['type_cuisine'].str.split(', ').explode()
+    types_uniques = sorted(cuisine for cuisine in cuisines.unique() if cuisine)
+
+    # Gérer les fourchettes de prix
     fourchettes_prix = ["Toutes les fourchettes"]
     valid_fourchettes = sorted(df['fourchette_prix'].dropna().unique().tolist())
     fourchettes_prix.extend([f for f in valid_fourchettes if f != ""])
 
-    selected_cuisine = st.sidebar.selectbox("Type de cuisine", types_uniques, index=2)
+    # Widgets Streamlit pour les sélections
+    selected_cuisine = st.sidebar.selectbox("Type de cuisine", types_uniques, index=0 if types_uniques else -1)
     selected_prix = st.sidebar.selectbox("Fourchette de prix", fourchettes_prix)
-
     note_min = st.sidebar.number_input("Note minimum", min_value=0.0, max_value=5.0, value=0.0)
 
-    filtered_df = df[df['type_cuisine'].str.contains(selected_cuisine)]
+    # Filtrage du DataFrame
+    filtered_df = df[df['type_cuisine'].str.contains(selected_cuisine, na=False)]
     filtered_df = filter_by_price_range(filtered_df, selected_prix)
     filtered_df = filtered_df[filtered_df['note_moyenne_resto'].astype(float) >= note_min]
 
     return filtered_df
+
 
 def get_user_location():
     st.write("Nous aimerions accéder à votre position pour afficher la distance jusqu'aux restaurants.")
