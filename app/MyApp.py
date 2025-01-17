@@ -24,7 +24,7 @@ with st.sidebar:
     page = option_menu(
         menu_title="Navigation",
         options=["Accueil", "Ajouter un restaurant", "Analyser un restaurant", "Comparer deux restaurants", "Résumé IA", "Croisement données de l'INSEE"],
-        icons=["house", "plus", "search", "arrows-angle-expand", "robot"],
+        icons=["house", "plus-circle", "search", "arrow-left-right", "robot", "graph-up"],
         menu_icon="list",
         default_index=0,
     )
@@ -42,4 +42,4 @@ elif page == "Résumé IA":
     resume_les_avis()
 elif page == "Croisement données de l'INSEE":
     etude_insee()
-    
+
