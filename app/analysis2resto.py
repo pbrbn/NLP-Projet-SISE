@@ -15,6 +15,8 @@ import random
 import folium
 from streamlit_folium import st_folium
 from geopy.distance import geodesic
+from folium import plugins
+from geopy.distance import geodesic
 from utils import conexion_db
 nlp = spacy.load('fr_core_news_md')
 
@@ -113,43 +115,6 @@ def get_user_location():
         return latitude, longitude
     return 45.7324, 4.9116
 
-def get_nearby_transit(lat, lon):
-    """
-    Simule la récupération des arrêts de transport à proximité.
-    Dans un cas réel, cette fonction appellerait une API de transport.
-
-    Args:
-        lat (float): Latitude du point central
-        lon (float): Longitude du point central
-
-    Returns:
-        list: Liste des arrêts de transport simulés
-    """
-    import random
-
-    # Définir des déltas aléatoires pour simuler des arrêts proches
-    transit_types = ['Metro', 'Bus', 'Tramway']
-    transit_lines = {
-        'Metro': ['A', 'B', 'C', 'D'],
-        'Bus': ['C1', 'C2', 'C3', 'C13', 'C14'],
-        'Tramway': ['T1', 'T2', 'T3', 'T4']
-    }
-
-    transports = []
-    for i in range(3):  # Générer 3 arrêts aléatoires
-        transit_type = random.choice(transit_types)
-        delta_lat = random.uniform(-0.002, 0.002)
-        delta_lon = random.uniform(-0.002, 0.002)
-
-        transport = {
-            "type": transit_type,
-            "name": f"Station {chr(65 + i)}",  # A, B, C...
-            "line": random.choice(transit_lines[transit_type]),
-            "coords": (lat + delta_lat, lon + delta_lon)
-        }
-        transports.append(transport)
-
-    return transports
 
 def generate_wordcloud(text_data: str, title: str = "Word Cloud", width: int = 800, height: int = 400, background_color: str = 'white', colormap: str = 'plasma', max_words: int = 200) -> go.Figure:
     """
@@ -190,84 +155,83 @@ def generate_wordcloud(text_data: str, title: str = "Word Cloud", width: int = 8
         st.error(f"Erreur lors de la génération du nuage de mots: {str(e)}")
         raise
 
-def display_comparison(restaurants_data, user_location, df):
-    col1, col2 = st.columns(2)
+def comparaison_deux_resto():
+    st.title("Comparaison de deux restaurants")
+    st.sidebar.title("Sélection des restaurants")
+    filtered_df = filter_restaurants(df)
 
-    map_ = folium.Map(
-        location=[45.75, 4.85],
-        zoom_start=12,
-        tiles='CartoDB positron',
-        scrollWheelZoom=True
+    if filtered_df.empty:
+        st.warning("Aucun restaurant ne correspond à vos critères de sélection.")
+        return
+
+    restaurant_choices = st.sidebar.multiselect(
+        "Sélectionnez deux restaurants à comparer:",
+        filtered_df['nom_resto'].unique(),
+        max_selections=2
     )
 
-    folium.WmsTileLayer(
-        url='https://data.grandlyon.com/geoserver/metropole-de-lyon/wms?',
-        layers='metropole-de-lyon:pvo_patrimoine_voirie.pvotrafic',
-        name='Trafic routier',
-        format='image/png',
-        transparent=True,
-    ).add_to(map_)
+    if len(restaurant_choices) == 2:
+        restaurants_data = [filtered_df[filtered_df['nom_resto'] == name].iloc[0] for name in restaurant_choices]
+        user_location = get_user_location()
 
-    transport_layer = folium.FeatureGroup(name='Transports en commun', show=True)
-    restaurant_layer = folium.FeatureGroup(name='Restaurants', show=True)
+        col1, col2 = st.columns(2)
 
-    folium.Marker(
-        location=user_location,
-        popup="Votre position",
-        tooltip="Vous êtes ici",
-        icon=folium.Icon(color="blue", icon="user", prefix="fa")
-    ).add_to(map_)
+        # Créer une carte unique pour les deux restaurants
+        map_center = user_location if user_location else (45.75, 4.85)  # Centre par défaut sur Lyon
+        map_ = folium.Map(location=map_center, zoom_start=12)
 
-    colors = ['red', 'green']
+        colors = ['red', 'green']
+        for i, (restaurant, col, color) in enumerate(zip(restaurants_data, [col1, col2], colors)):
+            col.subheader(restaurant['nom_resto'])
+            col.write(f"**Type de cuisine**: {restaurant['type_cuisine']}")
+            col.write(f"**Fourchette de prix**: {restaurant['fourchette_prix']}")
+            col.write(f"**Note moyenne**: {restaurant['note_moyenne_resto']}")
 
-    for i, (restaurant, col, color) in enumerate(zip(restaurants_data, [col1, col2], colors)):
-        col.subheader(restaurant['nom_resto'])
-        col.write(f"**Type de cuisine**: {restaurant['type_cuisine']}")
-        col.write(f"**Fourchette de prix**: {restaurant['fourchette_prix']}")
-        col.write(f"**Note moyenne**: {restaurant['note_moyenne_resto']}")
+            restaurant_coords = (restaurant['latitude'], restaurant['longitude'])
 
-        restaurant_coords = (restaurant['latitude'], restaurant['longitude'])
-        distance_km = geodesic(user_location, restaurant_coords).kilometers
-        col.write(f"**Distance estimée** : {distance_km:.2f} km")
+            # Distance et temps estimés
+            if user_location:
+                distance_km = geodesic(user_location, restaurant_coords).kilometers
+                estimated_time = distance_km / 50 * 60  # 50 km/h en moyenne
+                col.write(f"**Distance estimée** : {distance_km:.2f} km")
+                col.write(f"**Temps estimé** : {estimated_time:.0f} minutes")
 
-        # Obtenir les transports à proximité
-        nearby_transit = get_nearby_transit(restaurant['latitude'], restaurant['longitude'])
-
-        # Créer le contenu du popup avec les informations sur les transports
-        popup_content = f"{restaurant['nom_resto']} - {distance_km:.2f} km<br><br>Transports à proximité:<br>"
-        for transit in nearby_transit:
-            popup_content += f"- {transit['type']} {transit['line']} : {transit['name']}<br>"
-
-            # Ajouter un marqueur pour chaque transport
+            # Marqueur restaurant
             folium.Marker(
-                location=transit['coords'],
-                popup=f"{transit['type']} {transit['line']} : {transit['name']}",
-                tooltip=f"{transit['type']} {transit['line']}",
-                icon=folium.Icon(color="purple", icon="subway", prefix="fa")
-            ).add_to(transport_layer)
+                location=restaurant_coords,
+                popup=f"{restaurant['nom_resto']} ({restaurant['type_cuisine']})",
+                tooltip=restaurant['nom_resto'],
+                icon=folium.Icon(color=color, icon="cutlery", prefix="fa")
+            ).add_to(map_)
 
-        folium.Marker(
-            location=restaurant_coords,
-            popup=folium.Popup(popup_content, max_width=300),
-            tooltip=restaurant['nom_resto'],
-            icon=folium.Icon(color=color, icon="cutlery", prefix="fa")
-        ).add_to(restaurant_layer)
+            # Générer et afficher le nuage de mots pour ce restaurant
+            reviews = df[df['nom_resto'] == restaurant['nom_resto']]['commentaire'].tolist()
+            if reviews:
+                all_text = " ".join(reviews)
+                if all_text.strip():
+                    fig = generate_wordcloud(all_text, title=f"Nuage de mots pour {restaurant['nom_resto']}")
+                    col.plotly_chart(fig)
 
-        # Générer et afficher le nuage de mots pour ce restaurant
-        reviews = df[df['nom_resto'] == restaurant['nom_resto']]['commentaire'].tolist()
-        if reviews:
-            all_text = " ".join(reviews)
-            if all_text.strip():
-                fig = generate_wordcloud(all_text, title=f"Nuage de mots pour {restaurant['nom_resto']}")
-                col.plotly_chart(fig)
+        # Marqueur utilisateur (si localisation disponible)
+        if user_location:
+            folium.Marker(
+                location=user_location,
+                popup="Votre position",
+                tooltip="Vous êtes ici",
+                icon=folium.Icon(color="blue", icon="cutlery", prefix="fa")
+            ).add_to(map_)
 
-    transport_layer.add_to(map_)
-    restaurant_layer.add_to(map_)
+        # Afficher la carte
+        st.subheader("Carte des restaurants")
+        st_folium(map_, width=700, height=500)
 
-    folium.LayerControl().add_to(map_)
+        # Appel du graphique de comparaison
+        fig = plot_comparison_chart(restaurants_data)
+        st.plotly_chart(fig)
+    else:
+        st.info("Veuillez sélectionner exactement deux restaurants à comparer.")
 
-    st.write("**Carte des restaurants, transports en commun et trafic routier**")
-    st_folium(map_, width=800, height=500, returned_objects=["last_active_drawing"])
+
 
 def plot_comparison_chart(restaurant_data):
     """
@@ -294,9 +258,6 @@ def plot_comparison_chart(restaurant_data):
     return fig
 
 
-# Initialiser la classe ResumerAvis
-MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
-resumer_avis = ResumerAvis(api_key=MISTRAL_API_KEY)
 
 def comparaison_deux_resto():
     st.title("Comparaison de deux restaurants")
@@ -316,8 +277,56 @@ def comparaison_deux_resto():
     if len(restaurant_choices) == 2:
         restaurants_data = [filtered_df[filtered_df['nom_resto'] == name].iloc[0] for name in restaurant_choices]
         user_location = get_user_location()
-        display_comparison(restaurants_data, user_location, df)
-        # Appel du graphique
+
+        # Créer une carte Folium centrée sur Lyon
+        m = folium.Map(location=[45.75, 4.85], zoom_start=12)
+
+        colors = ['red', 'green']
+        col1, col2 = st.columns(2)
+
+        for i, (restaurant, col, color) in enumerate(zip(restaurants_data, [col1, col2], colors)):
+            col.subheader(restaurant['nom_resto'])
+            col.write(f"**Type de cuisine**: {restaurant['type_cuisine']}")
+            col.write(f"**Fourchette de prix**: {restaurant['fourchette_prix']}")
+            col.write(f"**Note moyenne**: {restaurant['note_moyenne_resto']}")
+
+            restaurant_coords = (restaurant['latitude'], restaurant['longitude'])
+
+            # Calculer la distance si la localisation de l'utilisateur est disponible
+            if user_location:
+                distance_km = geodesic(user_location, restaurant_coords).kilometers
+                col.write(f"**Distance estimée** : {distance_km:.2f} km")
+
+            # Ajouter un marqueur pour le restaurant
+            folium.Marker(
+                location=restaurant_coords,
+                popup=restaurant['nom_resto'],
+                tooltip=restaurant['nom_resto'],
+                icon=folium.Icon(color=color, icon="cutlery", prefix="fa")
+            ).add_to(m)
+
+            # Générer et afficher le nuage de mots pour ce restaurant
+            reviews = df[df['nom_resto'] == restaurant['nom_resto']]['commentaire'].tolist()
+            if reviews:
+                all_text = " ".join(reviews)
+                if all_text.strip():
+                    fig = generate_wordcloud(all_text, title=f"Nuage de mots pour {restaurant['nom_resto']}")
+                    col.plotly_chart(fig)
+
+        # Ajouter un marqueur pour la position de l'utilisateur si disponible
+        if user_location:
+            folium.Marker(
+                location=user_location,
+                popup="Votre position",
+                tooltip="Vous êtes ici",
+                icon=folium.Icon(color="blue", icon="user", prefix="fa")
+            ).add_to(m)
+
+        # Afficher la carte
+        st.subheader("Carte des restaurants")
+        st_folium(m, width=700, height=500)
+
+        # Appel du graphique de comparaison
         fig = plot_comparison_chart(restaurants_data)
         st.plotly_chart(fig)
     else:
