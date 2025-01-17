@@ -1,16 +1,20 @@
 #Python 
-FROM python:3.11-slim
+FROM python:3.11
 
 #Répertoire de travail 
 WORKDIR /app
 
 #Fichiers nécessaires 
-COPY ./app ./app
-COPY ./data ./data
-COPY ./src ./src
+COPY ../app /app/app
+COPY ../data /app/data
+COPY ../src /app/src
+COPY ../requirements.txt .
 
-#requirements
-COPY requirements.txt requirements.txt
+#Maj de pip 
+RUN pip install --upgrade pip
+
+# Installer blis séparément pour isoler l'erreur
+RUN pip install blis==0.7.4
 
 #Installation des dépendances 
 RUN pip install -r requirements.txt
@@ -19,4 +23,4 @@ RUN pip install -r requirements.txt
 EXPOSE 8501
 
 #Exécution de l'application 
-CMD ["streamlit", "run", "app/app.py"]
+CMD ["streamlit", "run", "app/MyApp.py"]
