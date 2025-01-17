@@ -112,10 +112,6 @@ DEFAULT_LONGITUDE = 4.9116
 
 def get_user_location():
     """Utilise JavaScript pour récupérer la position géographique de l'utilisateur."""
-    st.write(
-        "Nous aimerions accéder à votre position pour afficher la distance jusqu'aux restaurants. "
-        "Vous pouvez accepter ou refuser cette demande. Si vous refusez, des coordonnées par défaut seront utilisées."
-    )
     location = streamlit_js_eval(js_extras="geolocation", key="user_location")
     if location and "coords" in location:
         latitude = location["coords"]["latitude"]
@@ -125,8 +121,7 @@ def get_user_location():
 
 def display_restaurant_information(restaurant_data, user_location):
     """Affiche les informations sur le restaurant et une carte avec la localisation."""
-    st.title('Restaurant Review Analysis')
-    st.subheader('Restaurant Information')
+    st.title("Analyse d'un restaurant")
     st.write(f"**Nom du restaurant**: {restaurant_data['nom_resto']}")
     st.write(f"**Type de cuisine**: {restaurant_data['type_cuisine']}")
     st.write(f"**Fourchette de prix**: {restaurant_data['fourchette_prix']}")
@@ -183,7 +178,7 @@ def analyze_sentiments(reviews):
 
 def display_sentiment_analysis(average_polarity, average_subjectivity):
     """Affiche la polarité et la subjectivité moyennes."""
-    st.subheader('Sentiment Analysis')
+    st.subheader('Analyse des sentiments')
     st.write(f"Average Polarity: {average_polarity}")
     st.write(f"Average Subjectivity: {average_subjectivity}")
 
@@ -265,8 +260,7 @@ def analyze_restaurant(df, selected_restaurant):
         st.warning("Aucun avis disponible pour ce restaurant.")
 
 def analyse_restaurant():
-    st.sidebar.title("Restaurant Review Analysis")
-    st.sidebar.write("Welcome to the Restaurant Review Analysis app!")
+    st.sidebar.title("Sélection du restaurant")
 
     filtered_df = filter_restaurants(df)
 

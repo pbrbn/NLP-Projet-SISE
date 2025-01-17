@@ -293,11 +293,8 @@ MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
 resumer_avis = ResumerAvis(api_key=MISTRAL_API_KEY)
 
 def comparaison_deux_resto():
-    st.sidebar.title("Comparer deux restaurants")
-    st.markdown("""**Vous etes la parceque vous avez faim ou vous prevoyez quelque chose de speciale ?**
-                Vous avez toujours rêvé de savoir quel restaurant mérite vraiment vos papilles ? Cette page est faite pour vous ! Comparez deux restaurants en fonction de leur type de cuisine, de leur fourchette de prix et de leur note moyenne. Et si vous êtes du genre à vouloir le meilleur pour moins cher, vous pouvez même filtrer les restaurants selon vos critères préférés.
-                Alors, prêt à devenir un véritable critique culinaire ? C'est parti !""")
-
+    st.title("Comparaison de deux restaurants")
+    st.sidebar.title("Sélection des restaurants")
     filtered_df = filter_restaurants(df)
 
     if filtered_df.empty:
