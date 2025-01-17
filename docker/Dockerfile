@@ -1,5 +1,5 @@
 #Python 
-FROM python:3.11
+FROM python:3.11-slim
 
 #Répertoire de travail 
 WORKDIR /app
@@ -12,9 +12,6 @@ COPY ../requirements.txt .
 
 #Maj de pip 
 RUN pip install --upgrade pip
-
-# Installer blis séparément pour isoler l'erreur
-RUN pip install blis==0.7.4
 
 #Installation des dépendances 
 RUN pip install -r requirements.txt
