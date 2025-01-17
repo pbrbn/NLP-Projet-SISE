@@ -18,14 +18,6 @@ from resume12avis import resume_les_avis
 from streamlit_option_menu import option_menu
 import streamlit as st
 
-# Configuration de la page Streamlit
-st.set_page_config(page_title="Application de Gestion de Restaurants", page_icon="🍴", layout="wide")
-
-# Titre principal
-st.title("🍴 Application de Gestion de Restaurants")
-
-st.subheader("Bienvenue ! Utilisez le menu pour naviguer.")
-
 # Menu de navigation
 with st.sidebar:
     page = option_menu(

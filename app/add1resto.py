@@ -22,16 +22,15 @@ db.connect()
 
 def ajouter_restaurant():
     st.title("Ajouter un restaurant")
-    st.write("Type a restaurant name - the app will google-search it for you")
 
     # Formulaire pour ajouter une URL Tripadvisor
     with st.form(key="add_restaurant"):
-        nom_resto_user = st.text_input("Restaurant name")
+        nom_resto_user = st.text_input("Saisir le nom du restaurant")
 
         # Recherche de l'URL du restaurant à partir du nom
         url_resto = find_url_restaurant(nom_resto_user)
 
-        search_button = st.form_submit_button("Search")
+        search_button = st.form_submit_button("Chercher le restaurant", type="primary")
 
         if search_button:
             # Scraping des informations du restaurant à partir de l'URL
@@ -43,13 +42,13 @@ def ajouter_restaurant():
             adress_new = df_info_resto_new.iloc[0, 3]
 
             # Affichage des informations avant ajout à la base de données
-            st.success("Restaurant found")
+            st.success("Restaurant trouvé")
             st.write(f"Nom du restaurant : {nom_new}")
             st.write(f"Cuisine type : {type_cuisine_new}")
             st.write(f"Adress : {adress_new}")
 
         # Ajout du restaurant à la base de données
-        add_to_db_button = st.form_submit_button("Click here to add to database", type="primary")
+        add_to_db_button = st.form_submit_button("Cliquez ici pour ajouter le restaurant à la base de données", type="primary")
 
         if add_to_db_button:
             # Scraping complet du restaurant sur Tripadvisor
@@ -76,11 +75,11 @@ def ajouter_restaurant():
             # db.insert_avis()  # Ajout des avis si nécessaire
             db.close()
 
-            st.success("Restaurant added to database")
+            st.success("Restaurant ajouté à la base de données")
 
             # Affichage des résultats pour les tests
             st.dataframe(df_info_resto_new)
             st.dataframe(df_info_avis_new.head(5))
 
         # Bouton pour réinitialiser le formulaire
-        reset_button = st.form_submit_button("Reset")
+        reset_button = st.form_submit_button("Réinitialiser le formulaire", type="secondary")

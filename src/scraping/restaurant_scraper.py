@@ -221,12 +221,8 @@ class RestaurantScraper:
         nom_resto = []
         
         #Récupère le code html du site
-        response = requests.get(self.base_url, headers = self.headers)
-        if response.status_code != 200:
-            raise Exception(f"Échec de la récupération du contenu, code de statut : {response.status_code}")
-
-        #Parser avec BS4
-        html_content = response.text
+        html_content = self._fetch_html(self.base_url)
+        
         soup = BeautifulSoup(html_content, "html.parser")
 
         ##### NOM RESTO #####
