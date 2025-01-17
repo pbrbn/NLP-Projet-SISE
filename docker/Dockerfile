@@ -5,18 +5,18 @@ FROM python:3.11-slim
 WORKDIR /app
 
 #Fichiers nécessaires 
-COPY ./app ./app
-COPY ./data ./data
-COPY ./src ./src
+COPY ../data /app/data
+COPY ../src /app/src
+COPY ../app /app/app
 
 #requirements
-COPY requirements.txt requirements.txt
+COPY ../requirements.txt .
 
 #Installation des dépendances 
 RUN pip install -r requirements.txt
 
 #Port
-EXPOSE 8000
+EXPOSE 8501
 
 #Exécution de l'application 
-CMD ["streamlit", "run", "app/app.py"]
+CMD ["streamlit", "run", "app/MyApp.py"]
