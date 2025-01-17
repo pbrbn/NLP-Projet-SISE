@@ -211,7 +211,21 @@ class RestaurantScraper:
         }
         return pd.DataFrame(results)
 
-    def scrape_description_resto(self): 
+    def scrape_description_resto(self, max_retries=10):
+        '''
+        Permet de relancer la fonction _description_resto tant qu'elle ne sort pas le résultat attendu
+        '''
+        attempts = 0
+        while attempts < max_retries:
+            try:
+                time.sleep(1 + (2 * random.random()))
+                return self._description_resto()
+            except Exception as e:
+                attempts += 1
+                print(f"Erreur détectée : {e}. Nouvelle tentative ({attempts}/{max_retries})...")
+        raise RuntimeError("Echec après plusieurs tentatives")
+
+    def _description_resto(self): 
         '''
         Scrape la description d'un restaurant à partir de la page principale.
         Retourne un dataframe pandas contenant le nom du restaurant et sa description.
