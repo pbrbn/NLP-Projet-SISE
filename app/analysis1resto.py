@@ -50,7 +50,7 @@ df = get_data_from_db(db_path)
 
 #def load_data():
     #charger les données
-#    df = pd.read_csv("data_100.csv")
+#   df = pd.read_csv("data/data_100.csv")
 #   return df
 
 
