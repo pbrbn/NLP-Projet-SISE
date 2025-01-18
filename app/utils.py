@@ -24,7 +24,6 @@ def conexion_db(db_path):
     arrondissement = pd.read_sql_query('select * from arrondissement', db.conn)
     data = db.combine_tables(avis, info_resto, arrondissement)
     db.close()
-    data["commentaire"] = DataPreprocessor().preprocess_reviews(data["commentaire"])
     return DataPreprocessor().preprocess_data(data)
 
 
