@@ -4,6 +4,11 @@ import pandas as pd
 import numpy as np
 import re
 from geopy.geocoders import Nominatim
+# Preprocessing avis avant insertion
+import spacy
+from nltk.corpus import stopwords
+from nltk import download
+download('stopwords')
 
 
 class DBHandling:
@@ -29,6 +34,8 @@ class DBHandling:
         if not self.__initialized:  # Vérifie si l'instance a déjà été initialisée
             self.db_path = db_path
             self.conn = None
+            self.nlp = spacy.load("fr_core_news_sm") 
+            self.stop_words = set(stopwords.words('french'))  
             self.__initialized = True  # Marque l'instance comme initialisée
 
     def connect(self):
@@ -221,7 +228,7 @@ class DBHandling:
 
     def insert_avis(self, nom_restaurant: str, date: str, note: int, commentaire: str):
         """
-        Insère un avis dans la table 'avis'.
+        Insère un avis dans la table 'avis' et applique le préprocessing inspiré de la classe data_preprocessor.
 
         Args:
             nom_restaurant (str): Nom du restaurant.
@@ -236,7 +243,29 @@ class DBHandling:
             db.close()
         """
         try:
-            self.execute_query("INSERT INTO avis (nom_restaurant, date, note, commentaire) VALUES (?, ?, ?, ?)", (nom_restaurant, date, note, commentaire))
+            # Prétraitement du commentaire
+            commentaire = re.sub(r'\b\w{1,2}\b', '', commentaire).strip()
+
+            # Supprimer les chiffres
+            commentaire = ''.join([char for char in commentaire if not char.isdigit()])
+
+            # Supprimer les retours à la ligne et les espaces supplémentaires
+            commentaire = re.sub(r'\r\n|\r|\n', ' ', commentaire)
+            commentaire = re.sub(r'\s+', ' ', commentaire)
+
+            # Convertir en minuscules
+            commentaire = commentaire.lower()
+
+            # Traiter le texte avec spaCy
+            doc = self.nlp(commentaire)
+
+            # Lemmatisation et suppression des stopwords et ponctuation
+            cleaned_commentaire = ' '.join([
+                token.lemma_ for token in doc
+                if token.text.lower() not in self.stop_words and not token.is_punct
+            ])
+
+            self.execute_query("INSERT INTO avis (nom_restaurant, date, note, commentaire) VALUES (?, ?, ?, ?)", (nom_restaurant, date, note, cleaned_commentaire))
             # print("Insertion réussie.")
         except sqlite3.Error as e:
             print("Erreur lors de l'insertion.")
