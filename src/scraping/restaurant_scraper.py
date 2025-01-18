@@ -36,7 +36,7 @@ class RestaurantScraper:
         Scrape les informations des avis sur plusieurs pages.
         Retourne un DataFrame avec le nom du restaurant, les dates, notes et commentaires.
         """
-
+        time.sleep(1 + (2 * random.random()))
         html_content = self._fetch_html(self.base_url)
         soup = BeautifulSoup(html_content, "html.parser")
         nom_resto = [nom.text for nom in soup.find_all('h1', {'class': 'biGQs _P egaXP rRtyp'})]
@@ -120,6 +120,7 @@ class RestaurantScraper:
         '''
         Permet de relancer la fonction infos_resto tant qu'elle ne sort pas le résultat attendu
         '''
+        time.sleep(1 + (2 * random.random()))
         attempts = 0
         while attempts < max_retries:
             try:
@@ -215,6 +216,7 @@ class RestaurantScraper:
         '''
         Permet de relancer la fonction _description_resto tant qu'elle ne sort pas le résultat attendu
         '''
+        time.sleep(1 + (2 * random.random()))
         attempts = 0
         while attempts < max_retries:
             try:

@@ -27,13 +27,16 @@ def ajouter_restaurant():
     with st.form(key="add_restaurant"):
         nom_resto_user = st.text_input("Saisir le nom du restaurant")
 
+
         # Recherche de l'URL du restaurant à partir du nom
         url_resto = find_url_restaurant(nom_resto_user)
 
         search_button = st.form_submit_button("Chercher le restaurant", type="primary")
-
+        
         if search_button:
             # Scraping des informations du restaurant à partir de l'URL
+            # st.write(f"L'URL du restaurant {nom_resto_user} a été trouvé !")
+            # st.write(f"URL : {url_resto}") # Débugging , à enlever plus tard !!!!!
             rscrap = RestaurantScraper(base_url=url_resto)
             df_info_resto_new = rscrap.scrape_infos_resto()
             
@@ -52,15 +55,25 @@ def ajouter_restaurant():
 
         if add_to_db_button:
             # Scraping complet du restaurant sur Tripadvisor
+            # st.write(url_resto) # Débugging 
             rscrap = RestaurantScraper(base_url=url_resto)
             df_info_resto_new = rscrap.scrape_infos_resto()
             df_info_avis_new = rscrap.scrape_infos_avis()
+            try:
+                df_description_new = rscrap.scrape_description_resto()
+            except:
+                descrtiption_new = "Description non renseignée"
 
             nom_new = df_info_resto_new.iloc[0, 0]
             type_cuisine_new = df_info_resto_new.iloc[0, 1]
             fourchette_prix_new = df_info_resto_new.iloc[0, 2]
             adress_new = df_info_resto_new.iloc[0, 3]
             note_moy_new = df_info_resto_new.iloc[0, 4]
+            categorie_prix_new = df_info_resto_new.iloc[0, 5]
+
+            descrtiption_new = df_description_new.iloc[0, 1]
+            # st.write(f"Description : {descrtiption_new}")
+
 
             # Connexion à la base de données et insertion des données
             db.connect()
@@ -70,16 +83,35 @@ def ajouter_restaurant():
                 fourchette_prix=fourchette_prix_new,
                 adresse=adress_new,
                 note_moyenne=note_moy_new,
-                description="Description non renseignée"
+                description=descrtiption_new,
+                categorie_prix=categorie_prix_new
+
             )
-            # db.insert_avis()  # Ajout des avis si nécessaire
-            db.close()
+            # Ajout des avis si nécessaire
+            # st.write(df_info_avis_new)
+            # def insert_avis(self, nom_restaurant: str, date: str, note: int, commentaire: str):
+
+            for index, row in df_info_avis_new.iterrows():
+                db.insert_avis(
+                    note=row['Notes'],
+                    commentaire=row['Commentaires'],
+                    date=row['Date'],
+                    nom_restaurant=nom_new
+                )
 
             st.success("Restaurant ajouté à la base de données")
+            # Affichage des informations ajoutées avec sqlite
+            conn = sqlite3.connect("../data/database.db")
+            query_resto = 'select * from restaurant where nom = "{}"'.format(nom_new)
+            info_resto = pd.read_sql_query(query_resto, conn)
+            query_avis = 'select * from avis where nom_restaurant = "{}"'.format(nom_new)
+            info_avis = pd.read_sql_query(query_avis, conn)
+            st.write(info_resto.head())
+            st.write(info_avis.head())
 
-            # Affichage des résultats pour les tests
-            st.dataframe(df_info_resto_new)
-            st.dataframe(df_info_avis_new.head(5))
+            db.close()
+
+            
 
         # Bouton pour réinitialiser le formulaire
         reset_button = st.form_submit_button("Réinitialiser le formulaire", type="secondary")
