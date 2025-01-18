@@ -14,6 +14,7 @@ import numpy as np
 from streamlit_js_eval import streamlit_js_eval
 import random
 import folium
+import matplotlib.pyplot as plt
 from streamlit_folium import st_folium
 from geopy.distance import geodesic
 from utils import conexion_db
@@ -125,11 +126,10 @@ def get_user_location():
 
 def display_restaurant_information(restaurant_data, user_location):
     """Affiche les informations sur le restaurant et une carte avec la localisation."""
-    st.title("Analyse d'un restaurant")
-    st.write(f"**Nom du restaurant**: {restaurant_data['nom_resto']}")
-    st.write(f"**Type de cuisine**: {restaurant_data['type_cuisine']}")
-    st.write(f"**Fourchette de prix**: {restaurant_data['fourchette_prix']}")
-    st.write(f"**Note moyenne**: {restaurant_data['note_moyenne_resto']}")
+    st.write(f"🏠 **Nom du restaurant**: {restaurant_data['nom_resto']}")
+    st.write(f"🍳 **Type de cuisine**: {restaurant_data['type_cuisine']}")
+    st.write(f"💰 **Fourchette de prix**: {restaurant_data['fourchette_prix']}")
+    st.write(f"⭐ **Note moyenne**: {restaurant_data['note_moyenne_resto']}")
 
     restaurant_coords = (restaurant_data['latitude'], restaurant_data['longitude'])
 
@@ -137,8 +137,9 @@ def display_restaurant_information(restaurant_data, user_location):
     if user_location:
         distance_km = geodesic(user_location, restaurant_coords).kilometers
         estimated_time = distance_km / 50 * 60  # 50 km/h en moyenne
-        st.write(f"**Distance estimée** : {distance_km:.2f} km")
-        st.write(f"**Temps estimé** : {estimated_time:.0f} minutes")
+        st.write(f"🚗 **Distance estimée** : {distance_km:.2f} km")
+        st.write(f"⏱️ **Temps estimé** : {estimated_time:.0f} minutes")
+
     else:
         st.warning("Impossible de calculer la distance sans localisation.")
 
@@ -183,8 +184,9 @@ def analyze_sentiments(reviews):
 def display_sentiment_analysis(average_polarity, average_subjectivity):
     """Affiche la polarité et la subjectivité moyennes."""
     st.subheader('Analyse des sentiments')
-    st.write(f"Average Polarity: {average_polarity}")
-    st.write(f"Average Subjectivity: {average_subjectivity}")
+    st.write(f"😊Polarité : {average_polarity:.2f}")
+    st.write(f"😞 Subjectivité : {average_subjectivity:.2f}")
+
 
 def plot_sentiment_distribution(polarities):
     """Affiche un histogramme de la distribution des polarités avec Plotly."""
@@ -207,7 +209,6 @@ def generate_wordcloud(reviews):
                 background_color='white',
                 width=800,
                 height=400,
-                colormap='viridis',
                 max_words=200
             ).generate(all_text)
 
@@ -215,36 +216,30 @@ def generate_wordcloud(reviews):
             word_list = list(wordcloud.words_.keys())
             freq_list = list(wordcloud.words_.values())
 
-            # Définir les couleurs pour les mots
-            colors = [f"rgba({random.randint(0, 255)}, {random.randint(0, 255)}, {random.randint(0, 255)}, 0.7)" for _ in range(len(word_list))]
+            # Définir les couleurs des mots en fonction de leur fréquence
+            def color_func(word, font_size, position, orientation, random_state=None, **kwargs):
+                # Appliquer une couleur en fonction de la fréquence du mot
+                freq = wordcloud.words_[word]
+                # Plus le mot est fréquent, plus il est foncé
+                color_value = int(255 - freq * 255)
+                return f"rgb({color_value}, {color_value}, {random.randint(0, 255)})"
+            
+            # Créer un nuage de mots avec la fonction de couleur personnalisée
+            wordcloud = WordCloud(
+                background_color='white',
+                width=800,
+                height=400,
+                max_words=200,
+                color_func=color_func  # Appliquer la fonction de couleur
+            ).generate(all_text)
 
-            # Créer une disposition aléatoire des mots
-            x_coords = np.random.uniform(low=-1, high=1, size=len(word_list))
-            y_coords = np.random.uniform(low=-1, high=1, size=len(word_list))
+            # Afficher le nuage de mots
+            fig, ax = plt.subplots(figsize=(10, 5))
+            ax.imshow(wordcloud, interpolation="bilinear")
+            ax.axis('off')
 
-            # Créer la figure Plotly
-            fig = go.Figure(data=[go.Scatter(
-                x=x_coords,
-                y=y_coords,
-                mode="text",
-                text=word_list,
-                hoverinfo="text",
-                textfont=dict(
-                    size=[f * 70 for f in freq_list],
-                    color=colors
-                )
-            )])
-
-            # Personnaliser l'apparence de la figure
-            fig.update_layout(
-                xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-                yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-                margin=dict(l=0, r=0, t=0, b=0),
-                hovermode='closest'
-            )
-
-            # Afficher la figure dans Streamlit
-            st.plotly_chart(fig)
+            # Afficher dans Streamlit
+            st.pyplot(fig)
         else:
             st.warning("Le texte du nuage de mots est vide.")
     else:
@@ -264,6 +259,7 @@ def analyze_restaurant(df, selected_restaurant):
         st.warning("Aucun avis disponible pour ce restaurant.")
 
 def analyse_restaurant():
+    st.title("Analyse d'un restaurant")
     st.sidebar.title("Sélection du restaurant")
 
     filtered_df = filter_restaurants(df)
