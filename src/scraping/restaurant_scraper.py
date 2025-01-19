@@ -197,10 +197,6 @@ class RestaurantScraper:
         categorie_prix_regex = re.search(r'€[€-]*€', str(categorie_prix))
         categorie_prix_regex = categorie_prix_regex.group() if categorie_prix_regex else "NA"
 
-        # print(categorie_prix_regex)
-
-
-
         #Créer un DataFrame des résultats
         results = {
             "Nom": nom_resto,

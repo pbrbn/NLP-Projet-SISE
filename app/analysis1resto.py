@@ -58,7 +58,7 @@ df = get_data_from_db(db_path)
 
 # Initialiser la classe ResumerAvis
 MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
-resumer_avis = ResumerAvis(api_key=MISTRAL_API_KEY)
+resumer_avis = ResumerAvis(api_key=MISTRAL_API_KEY, type_query="analyze_clusters")
 
 def extract_price_range(price_string):
     """Extrait les valeurs min et max d'une fourchette de prix"""
@@ -289,28 +289,32 @@ def analyse_restaurant():
         st.warning("Aucun avis disponible pour générer un nuage de mots.")
 
     if not restaurant_reviews.empty:
-        clustering_interface()
+        clustering_interface(restaurant_reviews)
     else:
         st.warning("Aucun avis disponible pour générer un nuage de mots.")
 
-def clustering_interface():
+def clustering_interface(restaurant_reviews):
     st.subheader("Clustering des Avis")
     st.subheader("Analysez les avis en clusters.")
 
-    # Sélectionner le nombre de clusters
-    n_clusters = st.sidebar.number_input("Nombre de clusters", min_value=1, max_value=10, value=3)
-
     # Initialisation
     clusterer = ReviewClusterer()
+    clustering_result = None
 
     # Bouton pour lancer le clustering
     if st.button("Lancer le clustering"):
         with st.spinner("Clustering en cours..."):
             try:
-                avis = df['commentaire'].tolist()
-                clustering_result = clusterer.cluster_reviews(avis, n_clusters=n_clusters)
+                avis = restaurant_reviews['commentaire'].tolist()
+                clustering_result = clusterer.cluster_reviews(avis, n_clusters=3)
                 st.subheader("Résultats du clustering")
-                st.dataframe(clustering_result)
+                st.dataframe(clustering_result[0])
+                #Résumé avec LLM      
+                avis_clusters = clustering_result[1].iloc[:, 1].tolist()
+                resultat = resumer_avis.generer_resume(avis_restaurant_1=["ignore"], avis_restaurant_2=["ignore"], avis_clusters=avis_clusters)
+                st.subheader(f"Analyse des clusters :")
+                st.write(resultat)
+
             except Exception as e:
                 st.error(f"Erreur lors du clustering : {str(e)}")
 
