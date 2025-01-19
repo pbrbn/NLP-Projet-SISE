@@ -28,14 +28,19 @@ Les données sont issues du scrapping du site Tripadvisor et de l'open data de l
    cd NLP-Projet-SISE
 
 2. **Installation des dépendances**
-    ``sh
+    ```sh
     pip install --upgrade pip
     pip install -r requirements_v2.txt
-
-    ``sh
+   ```
+    ```sh
     python -m spacy download fr_core_news_md
+    ```
+    Ou bien avec Docker avec le .env contenant une clef MISTRAL :
+    ```sh
+    docker pull ql2111/projet_nlp:latest
+    docker run --env-file <chemin vers le .env> .env -p 8501:8501 ql2111/projet_nlp:latest
 3. **Lancer l'application**
-    sh``
+    ```sh
     streamlit run app/MyApp.py
 
 ## Contributeurs :
