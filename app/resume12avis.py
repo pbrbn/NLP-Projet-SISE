@@ -9,9 +9,9 @@ from processing.resume_avis import ResumerAvis
 from utils import conexion_db
 
 
-@st.cache_data
+
 def get_data_from_db(db_path):
-    """Charge les données depuis la base de données et les met en cache."""
+    """Charge les données depuis la base de données."""
     return conexion_db(db_path)
 
 def resume_les_avis():

@@ -25,9 +25,8 @@ sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '..', 'src')))
 from processing.keyword_extractor import KeywordExtractor
 from processing.resume_avis import ResumerAvis
 
-@st.cache_data
 def get_data_from_db(db_path):
-    """Charge les données depuis la base de données et les met en cache."""
+    """Charge les données depuis la base de données"""
     return conexion_db(db_path)
 
 # Chemin vers la DB

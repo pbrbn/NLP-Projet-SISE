@@ -35,9 +35,8 @@ from processing.review_clusterer import ReviewClusterer
 # Charger les variables d'environnement
 load_dotenv()
 
-@st.cache_data
 def get_data_from_db(db_path):
-    """Charge les données depuis la base de données et les met en cache."""
+    """Charge les données depuis la base de données."""
     return conexion_db(db_path)
 
 # Chemin vers la DB
