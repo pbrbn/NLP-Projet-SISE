@@ -3,6 +3,7 @@
 ## Description
 
 Le projet `NLP-Projet-SISE` est une application de traitement du langage naturel (NLP) qui permet de scraper, analyser et visualiser des données de restaurants et leurs avis. L'application utilise des techniques de NLP pour extraire des informations pertinentes à partir des avis des utilisateurs et les stocker dans une base de données SQLite. L'application est construite avec Python et utilise des bibliothèques telles que spaCy, pandas, et Streamlit pour l'analyse et la visualisation des données.
+Les données sont issues du scrapping du site Tripadvisor et de l'open data de l'INSEE
 
 ## Fonctionnalités
 
@@ -11,9 +12,8 @@ Le projet `NLP-Projet-SISE` est une application de traitement du langage naturel
 - Stockage des données dans une base de données SQLite.
 - Visualisation des données avec Streamlit.
 
-## Installation
 
-### Prérequis
+## Prérequis
 
 - Clef Mistral
 
@@ -28,9 +28,18 @@ Le projet `NLP-Projet-SISE` est une application de traitement du langage naturel
    cd NLP-Projet-SISE
 
 2. **Installation des dépendances**
-    ``pip install --upgrade pip
-    pip install -r requirements_v2.txt``
+    ``sh
+    pip install --upgrade pip
+    pip install -r requirements_v2.txt
 
-    ``python -m spacy download fr_core_news_md``
+    ``sh
+    python -m spacy download fr_core_news_md
 3. **Lancer l'application**
-    ``streamlit run app/MyApp.py``
+    sh``
+    streamlit run app/MyApp.py
+
+## Contributeurs :
+- Pierre Bourbon
+- Quentin Lim
+- Lansana Cisse
+- Alexis Dardelet
