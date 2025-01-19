@@ -22,7 +22,6 @@ nlp = spacy.load('fr_core_news_md')
 
 # Définition du chemin du répertoire courant
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '..', 'src')))
-from processing.sentiment_analyzer import SentimentAnalyzer
 from processing.keyword_extractor import KeywordExtractor
 from processing.resume_avis import ResumerAvis
 

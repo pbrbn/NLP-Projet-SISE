@@ -28,7 +28,6 @@ nlp = spacy.load('fr_core_news_md')
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '..', 'src')))
 
 from processing.data_preprocessor import DataPreprocessor
-from processing.sentiment_analyzer import SentimentAnalyzer
 from processing.keyword_extractor import KeywordExtractor
 from processing.resume_avis import ResumerAvis
 from processing.review_clusterer import ReviewClusterer
